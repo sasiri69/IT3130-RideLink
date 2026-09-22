@@ -7,6 +7,9 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - SPRING_DATA_MONGODB_URI=mongodb+srv://shanugajayakody4_db_user:nZnnlJJitPjxxD3n@cluster0.zoid68x.mongodb.net/ridelink_account_db?retryWrites=true&w=majority&appName=Cluster0
-      - JWT_SECRET=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      - SPRING_DATA_MONGODB_URI=${MONGO_URI:-mongodb://localhost:27017/ridelink_account_db}
+      - JWT_SECRET=${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      - SERVER_PORT=8081
+    env_file:
+      - .env
     restart: always
