@@ -1,0 +1,24 @@
+services:
+  driver-mongodb:
+    image: mongo:6.0
+    container_name: ridelink-driver-mongodb
+    ports:
+      - "27018:27017"
+    volumes:
+      - driver_mongo_data:/data/db
+
+  driver-service:
+    build: .
+    container_name: ridelink-driver-service
+    ports:
+      - "8082:8082"
+    environment:
+      SERVER_PORT: 8082
+      MONGODB_URI: mongodb://driver-mongodb:27017/ridelink_driver_db
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      ACCOUNT_SERVICE_URL: http://host.docker.internal:8081
+    depends_on:
+      - driver-mongodb
+
+volumes:
+  driver_mongo_data:

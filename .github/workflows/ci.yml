@@ -1,0 +1,44 @@
+name: Driver & Vehicle Service CI
+
+on:
+  push:
+    branches: [ "main", "develop", "driver-service", "feature/**" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build-and-test:
+    name: Build & Test – Driver & Vehicle Service
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Start MongoDB Service
+        uses: supercharge/mongodb-github-action@1.10.0
+        with:
+          mongodb-version: '6.0'
+
+      - name: Build and run automated unit & slice tests
+        run: mvn clean test --no-transfer-progress
+        env:
+          SERVER_PORT: 8082
+          MONGODB_URI: "mongodb://localhost:27017/ridelink_driver_test"
+          JWT_SECRET: "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
+          ACCOUNT_SERVICE_URL: "http://localhost:8081"
+          ACCOUNT_SERVICE_TIMEOUT_MS: 5000
+
+      - name: Upload test report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: driver-service-test-report
+          path: target/surefire-reports/
