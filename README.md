@@ -1,164 +1,75 @@
-# RideLink – Account Service (IT3130)
+# RideLink – Backend Microservices for a Ride-Sharing Platform
 
-> **IT3130 Application Development | Group Assignment**
-> Microservice #1 — Account & Authentication Service
-
----
-
-## Overview
-
-The Account Service manages all user identity, authentication and authorization for the RideLink ride-sharing platform. It is one of four independently deployable Spring Boot microservices.
-
-**Responsibilities:**
-- Passenger and driver account registration
-- Login and JWT access token issuance
-- Refresh token rotation and logout
-- Role-based access control (PASSENGER, DRIVER, ADMIN)
-- Profile viewing and updating
-- Account status management (ACTIVE / INACTIVE / SUSPENDED)
+Backend microservices solution for a ride-sharing platform developed for **IT3130 – Application Development**.
 
 ---
 
-## Technology Stack
+## 👥 Group Members & Service Ownership
 
-| Layer | Technology |
-|---|---|
-| Language | Java 17 |
-| Framework | Spring Boot 4.0.8 |
-| Database | MongoDB Atlas (own isolated database) |
-| Authentication | JWT (JJWT 0.11.5) + BCrypt |
-| API Docs | SpringDoc OpenAPI / Swagger UI |
-| Build | Maven |
+| # | Microservice | Primary Owner | Student ID | Status | Port |
+|---|---|---|---|---|---|
+| **1** | **Account Service** | Jayakody J A K S S | IT24100778 | ✅ Completed & Tested | `8081` |
+| **2** | **Driver & Vehicle Service** | Member 2 | IT24100687 | ✅ Completed & Tested | `8082` |
+| **3** | **Ride Management Service** | Idusara S K U | IT24101290 | In Progress | `8083` |
+| **4** | **Fare & Payment Service** | Meththasinghe M.D.D.T | IT24100891 | In Progress | `8084` |
 
 ---
 
-## Prerequisites
+## 🏗️ Architecture & Technology Stack
 
-- Java 21+
-- Maven 3.9+
-- MongoDB Atlas account (or local MongoDB)
+- **Framework**: Java 17, Spring Boot 3
+- **Security**: Stateless JWT Authentication & Role-Based Access Control (`ROLE_PASSENGER`, `ROLE_DRIVER`, `ROLE_ADMIN`)
+- **Database Boundary**: Independent MongoDB databases (`account_db` and `driver_db`)
+- **API Documentation**: OpenAPI 3 / Swagger UI
+- **Containerization**: Docker & Docker Compose
+- **Continuous Integration**: GitHub Actions CI (`.github/workflows/ci.yml`)
 
 ---
 
-## Configuration – Environment Variables
+## 📁 Repository Structure
 
-> ⚠️ **Never hardcode credentials.** Copy `.env.example` to `.env` and fill in real values.
+```
+IT3130-RideLink/
+├── account-service/          # Member 1: Account & Auth Service (Port 8081)
+│   ├── src/
+│   ├── pom.xml
+│   ├── Dockerfile
+│   └── postman/
+├── driver-service/           # Member 2: Driver & Vehicle Service (Port 8082)
+│   ├── src/
+│   ├── pom.xml
+│   ├── Dockerfile
+│   └── postman/
+├── .github/workflows/        # Automated CI building and testing all services
+│   └── ci.yml
+├── docker-compose.yml        # Orchestrates all microservices & MongoDB databases
+└── README.md
+```
 
-| Variable | Description | Default |
-|---|---|---|
-| `MONGODB_URI` | MongoDB connection string | *required* |
-| `JWT_SECRET` | JWT signing secret (≥32 hex chars) | *required* |
-| `JWT_EXPIRATION` | Access token expiry in ms | `86400000` (24h) |
-| `JWT_REFRESH_EXPIRATION` | Refresh token expiry in ms | `604800000` (7d) |
-| `SERVER_PORT` | HTTP port | `8081` |
+---
 
-Set variables before running:
+## 🚀 Running the System
+
+### Option 1: Running with Docker Compose (Recommended)
 ```bash
-# PowerShell
-$env:MONGODB_URI = "mongodb+srv://..."
-$env:JWT_SECRET  = "your_secret_here"
+docker-compose up --build
 ```
 
----
-
-## Running the Service
-
-```bash
-# 1. Clone and enter the directory
-git clone <repo-url>
-cd account-service
-
-# 2. Set environment variables (see above)
-
-# 3. Build and run
-mvn spring-boot:run
-```
-
-Service starts on **http://localhost:8081**
+### Option 2: Running Services Locally
+1. Start MongoDB on ports `27017` and `27018`.
+2. Run Account Service:
+   ```bash
+   cd account-service
+   mvn spring-boot:run
+   ```
+3. Run Driver & Vehicle Service:
+   ```bash
+   cd driver-service
+   mvn spring-boot:run
+   ```
 
 ---
 
-## API Endpoints
-
-| Method | Endpoint | Auth | Description | Status Code |
-|---|---|---|---|---|
-| POST | `/api/auth/register` | None | Register new passenger/driver | `201 Created` |
-| POST | `/api/auth/login` | None | Login — returns JWT + refresh token | `200 OK` (or `401 Unauthorized`) |
-| POST | `/api/auth/refresh` | None | Get new access token using refresh token | `200 OK` (or `401 Unauthorized`) |
-| POST | `/api/auth/logout` | Bearer JWT | Revoke refresh tokens | `204 No Content` |
-| GET | `/api/users/me` | Bearer JWT | Get own profile (UserResponse DTO) | `200 OK` |
-| PATCH | `/api/users/me/profile` | Bearer JWT | Update profile details (PUT also supported) | `200 OK` |
-| GET | `/api/users?role={role}&status={status}` | ADMIN only | Get all users (supports query filtering by role/status) | `200 OK` |
-| GET | `/api/users/{id}` | ADMIN only | Get user by ID (path variable) | `200 OK` (or `404 Not Found`) |
-| PATCH | `/api/users/{id}/status` | ADMIN only | Update account status | `200 OK` |
-| DELETE | `/api/users/me` | Bearer JWT | Delete own account & revoke all sessions | `204 No Content` |
-| DELETE | `/api/users/{id}` | ADMIN only | Delete user by ID & revoke their sessions | `204 No Content` (or `404 Not Found`) |
-
-> 🔒 **Security & Clean Architecture Note**: In compliance with REST API standards, raw database entities (`User`) are never returned directly; all user endpoints return safe `UserResponse` DTOs that strictly exclude internal fields such as `passwordHash`.
->
-> 💡 **REST Design Principles (Lecture 07/08 Compliance)**:
-> - **Path Variables** vs **Query Parameters**: Path variables (`/api/users/{id}`) identify specific resource entities; query parameters (`/api/users?role=DRIVER&status=ACTIVE`) filter collection subsets.
-> - **Idempotency**: `GET`, `PUT`, and `DELETE` operations are idempotent.
-> - **Stateless Authentication**: Every protected request carries authentication via `Authorization: Bearer <jwt>`. No session state is held on the server.
-
----
-
-## Swagger UI
-
-Once running, open: **http://localhost:8081/swagger-ui.html**
-
-Click **Authorize** and paste your Bearer token to test protected endpoints.
-
----
-
-## Running Tests
-
-```bash
-mvn test
-```
-
-Test results are saved to `target/surefire-reports/`.
-
----
-
-## Sample Test Data
-
-**Register a Passenger:**
-```json
-POST /api/auth/register
-{
-  "firstName": "Kamal",
-  "lastName": "Perera",
-  "email": "kamal@test.com",
-  "password": "password123",
-  "phone": "0712345678",
-  "role": "PASSENGER"
-}
-```
-
-**Register a Driver:**
-```json
-POST /api/auth/register
-{
-  "firstName": "Nimal",
-  "lastName": "Silva",
-  "email": "nimal@test.com",
-  "password": "password123",
-  "phone": "0771234567",
-  "role": "DRIVER"
-}
-```
-
----
-
-## CI/CD
-
-GitHub Actions workflow runs on every push/PR to `main` and `develop`:
-- `.github/workflows/ci.yml`
-- Builds with Java 17, runs all unit tests, uploads test report artifacts
-
----
-
-## Service Owner
-
-**Member 1** — Primary owner of the Account Service.
+## 📖 API Documentation & Swagger UI
+- **Account Service**: `http://localhost:8081/swagger-ui.html`
+- **Driver & Vehicle Service**: `http://localhost:8082/swagger-ui.html`
