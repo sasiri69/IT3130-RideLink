@@ -1,15 +1,48 @@
 version: '3.8'
 
 services:
+  # Member 1: Account Service (IT24100778)
   account-service:
-    build: .
-    container_name: account-service-container
+    build: ./account-service
     ports:
       - "8081:8081"
     environment:
-      - SPRING_DATA_MONGODB_URI=${MONGO_URI:-mongodb://localhost:27017/ridelink_account_db}
-      - JWT_SECRET=${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-      - SERVER_PORT=8081
-    env_file:
-      - .env
-    restart: always
+      - PORT=8081
+      - MONGODB_URI=mongodb://account-db:27017/account_db
+      - JWT_SECRET=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      - JWT_EXPIRATION=86400000
+    depends_on:
+      - account-db
+
+  account-db:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - account_mongo_data:/data/db
+
+  # Member 2: Driver & Vehicle Service (IT24100687)
+  driver-service:
+    build: ./driver-service
+    ports:
+      - "8082:8082"
+    environment:
+      - PORT=8082
+      - MONGODB_URI=mongodb://driver-db:27017/driver_db
+      - JWT_SECRET=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      - JWT_EXPIRATION=86400000
+      - SERVICES_ACCOUNT_URL=http://account-service:8081
+    depends_on:
+      - driver-db
+      - account-service
+
+  driver-db:
+    image: mongo:latest
+    ports:
+      - "27018:27017"
+    volumes:
+      - driver_mongo_data:/data/db
+
+volumes:
+  account_mongo_data:
+  driver_mongo_data:
