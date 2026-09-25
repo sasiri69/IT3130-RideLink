@@ -37,6 +37,8 @@ public class SecurityConfig {
                 ).permitAll()
                 // Permit public read operations for availability checks and nearby driver search
                 .requestMatchers(HttpMethod.GET, "/api/drivers/available", "/api/drivers/nearby", "/api/drivers/{driverId}").permitAll()
+                // Permit inter-service stats update from Ride Management Service (no user JWT on internal calls)
+                .requestMatchers(HttpMethod.PATCH, "/api/drivers/*/stats").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

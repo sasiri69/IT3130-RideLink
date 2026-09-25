@@ -414,6 +414,41 @@ public class DriverController {
         return ResponseEntity.ok(driverService.updateAdminStatus(driverId, request));
     }
 
+    // ─── 12. Driver Stats Update (Ride Service → Driver Service inter-service) ────
+
+    /**
+     * Updates driver's running average rating and total ride count after a ride completes.
+     * <p>
+     * This endpoint is consumed by the Ride Management Service via synchronous inter-service
+     * REST communication (Lecture 08 – Communication Interfaces II, Assignment §6.2).
+     * It maintains driver reputation data within the Driver Service's own data boundary
+     * without the Ride Service ever accessing the Driver database directly (Assignment §6.1).
+     * </p>
+     *
+     * @param driverId Driver account ID to update
+     * @param request  Stats payload (newRating 1.0–5.0, ridesIncrement)
+     * @return Updated driver profile with recalculated rating and ride count
+     */
+    @PatchMapping("/{driverId}/stats")
+    @Operation(
+            summary = "Update driver rating and ride count (called by Ride Management Service)",
+            description = "Inter-service endpoint consumed by the Ride Management Service after ride completion " +
+                    "to increment totalRides and recalculate rolling average rating. " +
+                    "Enforces Assignment §6.1 data boundary: Ride Service uses this API instead of querying the Driver DB."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Driver stats updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid rating (must be 1.0–5.0) or ride increment"),
+            @ApiResponse(responseCode = "404", description = "Driver not found")
+    })
+    public ResponseEntity<DriverResponse> updateDriverStats(
+            @Parameter(description = "Driver account ID") @PathVariable String driverId,
+            @Valid @RequestBody DriverStatsUpdateRequest request
+    ) {
+        log.info("REST PATCH /api/drivers/{}/stats - Inter-service stats update from Ride Service", driverId);
+        return ResponseEntity.ok(driverService.updateDriverStats(driverId, request));
+    }
+
     // ─── Helper for Role / Ownership verification ───────────────────────────────
 
     /**
@@ -440,3 +475,4 @@ public class DriverController {
         }
     }
 }
+

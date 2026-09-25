@@ -373,6 +373,38 @@ public class DriverService {
         return DriverResponse.fromEntity(updated);
     }
 
+    /**
+     * Updates driver ride statistics after a completed ride.
+     * <p>
+     * Called by the Ride Management Service via synchronous inter-service REST
+     * (Lecture 08 – Communication Interfaces II, Assignment §6.2).
+     * Increments {@code totalRides} and recalculates a rolling average rating:
+     * <pre>newAvg = ((oldRating * oldRides) + newRating) / (oldRides + increment)</pre>
+     * If no rating is supplied, only {@code totalRides} is updated.
+     * </p>
+     *
+     * @param driverId Target driver ID
+     * @param request  Stats update payload (newRating, ridesIncrement)
+     * @return Updated driver profile response
+     */
+    public DriverResponse updateDriverStats(String driverId, DriverStatsUpdateRequest request) {
+        Driver driver = findDriverOrThrow(driverId);
+
+        int oldRides = driver.getTotalRides() == null ? 0 : driver.getTotalRides();
+        int newTotalRides = oldRides + request.getRidesIncrement();
+
+        if (request.getNewRating() != null && newTotalRides > 0) {
+            double oldRating = driver.getRating() == null ? 5.0 : driver.getRating();
+            double blended = ((oldRating * oldRides) + request.getNewRating()) / newTotalRides;
+            driver.setRating(Math.round(blended * 100.0) / 100.0);
+        }
+
+        driver.setTotalRides(newTotalRides);
+        Driver updated = driverRepository.save(driver);
+        log.info("Stats updated for driver {}: totalRides={}, rating={}", driverId, updated.getTotalRides(), updated.getRating());
+        return DriverResponse.fromEntity(updated);
+    }
+
     private Driver findDriverOrThrow(String driverId) {
         return driverRepository.findByDriverId(driverId.trim())
                 .or(() -> driverRepository.findById(driverId.trim()))
