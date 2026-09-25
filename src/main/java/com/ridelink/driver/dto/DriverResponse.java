@@ -48,6 +48,7 @@ public class DriverResponse {
         links.put("location", "/api/drivers/" + driver.getDriverId() + "/location");
         links.put("vehicle", "/api/drivers/" + driver.getDriverId() + "/vehicle");
         links.put("serviceArea", "/api/drivers/" + driver.getDriverId() + "/service-area");
+        links.put("stats", "/api/drivers/" + driver.getDriverId() + "/stats");
 
         return DriverResponse.builder()
                 .id(driver.getId())

@@ -317,4 +317,46 @@ class DriverControllerTest {
                 .andExpect(jsonPath("$.make").value("Toyota"))
                 .andExpect(jsonPath("$.licensePlate").value("CAB-1234"));
     }
+
+    // ─── Stats Endpoint Tests (Inter-service) ────────────────────────────────────
+
+    @Test
+    @DisplayName("PATCH /api/drivers/{driverId}/stats - Returns 200 OK with updated rating and ride count")
+    void testUpdateDriverStats_Success() throws Exception {
+        DriverStatsUpdateRequest request = DriverStatsUpdateRequest.builder()
+                .newRating(4.8)
+                .ridesIncrement(1)
+                .build();
+
+        DriverResponse mockResponse = DriverResponse.builder()
+                .driverId("user-101")
+                .rating(4.8)
+                .totalRides(10)
+                .build();
+
+        when(driverService.updateDriverStats(eq("user-101"), any())).thenReturn(mockResponse);
+
+        mockMvc.perform(patch("/api/drivers/user-101/stats")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rating").value(4.8))
+                .andExpect(jsonPath("$.totalRides").value(10));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/drivers/{driverId}/stats - Negative Scenario: Returns 400 when rating is out of range")
+    void testUpdateDriverStats_InvalidRating_BadRequest() throws Exception {
+        DriverStatsUpdateRequest invalidRequest = DriverStatsUpdateRequest.builder()
+                .newRating(6.0) // invalid: max is 5.0
+                .ridesIncrement(1)
+                .build();
+
+        mockMvc.perform(patch("/api/drivers/user-101/stats")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.validationErrors").exists());
+    }
 }

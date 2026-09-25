@@ -362,4 +362,44 @@ class DriverServiceTest {
         assertThat(vehicle).isNotNull();
         assertThat(vehicle.getLicensePlate()).isEqualTo("CAB-1234");
     }
+
+    // ─── 7. Stats Update (Inter-service) Tests ──────────────────────────────────
+
+    @Test
+    @DisplayName("Should update totalRides and recalculate rolling average rating correctly")
+    void testUpdateDriverStats_WithRating() {
+        existingDriver.setTotalRides(4);
+        existingDriver.setRating(4.5);
+        when(driverRepository.findByDriverId("user-101")).thenReturn(Optional.of(existingDriver));
+        when(driverRepository.save(any(Driver.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        DriverStatsUpdateRequest request = DriverStatsUpdateRequest.builder()
+                .newRating(5.0)
+                .ridesIncrement(1)
+                .build();
+
+        DriverResponse response = driverService.updateDriverStats("user-101", request);
+
+        assertThat(response.getTotalRides()).isEqualTo(5);
+        // Expected: ((4.5 * 4) + 5.0) / 5 = 23.0 / 5 = 4.6
+        assertThat(response.getRating()).isEqualTo(4.6);
+    }
+
+    @Test
+    @DisplayName("Should increment totalRides only when no rating is provided")
+    void testUpdateDriverStats_NoRating_OnlyRidesUpdated() {
+        existingDriver.setTotalRides(3);
+        existingDriver.setRating(4.0);
+        when(driverRepository.findByDriverId("user-101")).thenReturn(Optional.of(existingDriver));
+        when(driverRepository.save(any(Driver.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        DriverStatsUpdateRequest request = DriverStatsUpdateRequest.builder()
+                .ridesIncrement(1)
+                .build(); // newRating is null
+
+        DriverResponse response = driverService.updateDriverStats("user-101", request);
+
+        assertThat(response.getTotalRides()).isEqualTo(4);
+        assertThat(response.getRating()).isEqualTo(4.0); // unchanged
+    }
 }
