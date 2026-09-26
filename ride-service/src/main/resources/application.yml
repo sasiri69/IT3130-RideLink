@@ -1,0 +1,33 @@
+server:
+  port: ${PORT:8083}
+
+spring:
+  application:
+    name: ride-service
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/ride_db}
+
+jwt:
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+services:
+  account:
+    url: ${SERVICES_ACCOUNT_URL:http://localhost:8081}
+    timeout-ms: 5000
+  driver:
+    url: ${SERVICES_DRIVER_URL:http://localhost:8082}
+    timeout-ms: 5000
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+logging:
+  level:
+    root: INFO
+    com.ridelink.ride: DEBUG
