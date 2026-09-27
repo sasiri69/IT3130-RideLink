@@ -86,6 +86,7 @@ public class DriverController {
     })
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<DriverResponse> getMyProfile(@RequestHeader("Authorization") String authHeader) {
+        log.info("REST GET /api/drivers/me - Fetching profile for authenticated driver");
         String token = authHeader.substring(7);
         String userId = jwtService.extractUserId(token);
         return ResponseEntity.ok(driverService.getDriverById(userId));
