@@ -26,8 +26,15 @@ public class AuthController {
     private final UserService userService;
     private final JwtService jwtService;
 
+    // CHANGE: Added public service health endpoint.
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Account Service is running");
+    }
+
     @PostMapping("/register")
-    @Operation(summary = "Register a new passenger or driver account")
+    // CHANGE: Expanded registration OpenAPI documentation.
+    @Operation(summary = "Register user", description = "Registers a new user into the system")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Account created successfully"),
         @ApiResponse(responseCode = "400", description = "Validation failed"),
