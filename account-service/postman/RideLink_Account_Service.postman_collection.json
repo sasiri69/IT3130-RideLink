@@ -1,0 +1,711 @@
+{
+  "info": {
+    "name": "RideLink – Account Service",
+    "description": "IT3130 Application Development | Group Assignment\nMicroservice #1: Account & Authentication Service (Member 1)\n\nCovers:\n1. 🔐 Authentication & Token Management (Register, Login, Token Refresh, Logout)\n2. 👤 User Profile Management (Get Profile, PATCH/PUT Profile)\n3. 🔑 Admin User Operations (Get All Users, Query Filtering, Get by ID, Status Update, Admin Delete)\n4. 🗑️ Account Deletion (Self Delete & Verification)\n5. ❌ Negative & Error Scenarios (400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 409 Conflict)\n\nCompliance:\n• IT3130 Lecture 07: REST Fundamentals (Resource URLs, HTTP semantics, Path vs Query, Status codes)\n• IT3130 Lecture 08: REST Constraints, Stateless JWT, Richardson Maturity Model Level 2\n\nHow to use:\n1. Import this collection into Postman\n2. Import the RideLink_Account_Environment.json environment file and select it\n3. Run requests individually or run the entire collection via Postman Collection Runner — variables chain automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 1. Authentication & Token Management",
+      "item": [
+        {
+          "name": "Register – Passenger",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.environment.set('accessToken', json.accessToken);",
+                  "    pm.environment.set('refreshToken', json.refreshToken);",
+                  "    pm.environment.set('userId', json.userId);",
+                  "    console.log('✅ Passenger registered. Token saved.');",
+                  "}",
+                  "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));",
+                  "pm.test('Response has accessToken', () => pm.expect(pm.response.json()).to.have.property('accessToken'));",
+                  "pm.test('Role is PASSENGER', () => pm.expect(pm.response.json().role).to.eql('PASSENGER'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Kamal\",\n  \"lastName\": \"Perera\",\n  \"email\": \"kamal.perera@test.com\",\n  \"password\": \"password123\",\n  \"phone\": \"0712345678\",\n  \"role\": \"PASSENGER\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"]}
+          }
+        },
+        {
+          "name": "Register – Driver",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.environment.set('driverToken', json.accessToken);",
+                  "    pm.environment.set('driverRefreshToken', json.refreshToken);",
+                  "    pm.environment.set('driverId', json.userId);",
+                  "    console.log('✅ Driver registered. Driver token saved.');",
+                  "}",
+                  "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));",
+                  "pm.test('Role is DRIVER', () => pm.expect(pm.response.json().role).to.eql('DRIVER'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Nimal\",\n  \"lastName\": \"Silva\",\n  \"email\": \"nimal.silva@test.com\",\n  \"password\": \"password123\",\n  \"phone\": \"0771234567\",\n  \"role\": \"DRIVER\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"]}
+          }
+        },
+        {
+          "name": "Register – Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.environment.set('adminToken', json.accessToken);",
+                  "    pm.environment.set('adminId', json.userId);",
+                  "    console.log('✅ Admin registered. Admin token saved.');",
+                  "}",
+                  "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));",
+                  "pm.test('Role is ADMIN', () => pm.expect(pm.response.json().role).to.eql('ADMIN'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Admin\",\n  \"lastName\": \"User\",\n  \"email\": \"admin@ridelink.com\",\n  \"password\": \"admin123\",\n  \"phone\": \"0700000001\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"]}
+          }
+        },
+        {
+          "name": "Login – Passenger",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    pm.environment.set('accessToken', json.accessToken);",
+                  "    pm.environment.set('refreshToken', json.refreshToken);",
+                  "    pm.environment.set('userId', json.userId);",
+                  "    console.log('✅ Login successful. Token saved.');",
+                  "}",
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Response has accessToken', () => pm.expect(pm.response.json()).to.have.property('accessToken'));",
+                  "pm.test('Refresh token is NOT a stub', () => pm.expect(pm.response.json().refreshToken).to.not.eql('temp-refresh-token'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"kamal.perera@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"]}
+          }
+        },
+        {
+          "name": "Login – Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    pm.environment.set('adminToken', json.accessToken);",
+                  "    pm.environment.set('adminId', json.userId);",
+                  "    console.log('✅ Admin login successful. Admin token saved.');",
+                  "}",
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@ridelink.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"]}
+          }
+        },
+        {
+          "name": "Refresh Access Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    pm.environment.set('accessToken', json.accessToken);",
+                  "    pm.environment.set('refreshToken', json.refreshToken);",
+                  "    console.log('✅ Tokens rotated successfully.');",
+                  "}",
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('New accessToken returned', () => pm.expect(pm.response.json()).to.have.property('accessToken'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/api/auth/refresh", "host": ["{{baseUrl}}"], "path": ["api", "auth", "refresh"]}
+          }
+        },
+        {
+          "name": "Logout (Revoke Refresh Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 204 No Content', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": {"raw": "{{baseUrl}}/api/auth/logout", "host": ["{{baseUrl}}"], "path": ["api", "auth", "logout"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 2. User Profile Management",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Profile has email', () => pm.expect(pm.response.json()).to.have.property('email'));",
+                  "pm.test('Password hash not exposed', () => pm.expect(pm.response.json()).to.not.have.property('passwordHash'));",
+                  "pm.test('Plain password not exposed', () => pm.expect(pm.response.json()).to.not.have.property('password'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": {"raw": "{{baseUrl}}/api/users/me", "host": ["{{baseUrl}}"], "path": ["api", "users", "me"]}
+          }
+        },
+        {
+          "name": "Update My Profile (PATCH - Selected Fields)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('First name updated', () => pm.expect(pm.response.json().firstName).to.eql('Kamal Updated'));",
+                  "pm.test('Password hash not exposed', () => pm.expect(pm.response.json()).to.not.have.property('passwordHash'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Kamal Updated\",\n  \"lastName\": \"Perera\",\n  \"phone\": \"0712999999\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/api/users/me/profile", "host": ["{{baseUrl}}"], "path": ["api", "users", "me", "profile"]}
+          }
+        },
+        {
+          "name": "Update My Profile (PUT Alias)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Profile updated via PUT', () => pm.expect(pm.response.json().firstName).to.eql('Kamal PutUpdated'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Kamal PutUpdated\",\n  \"lastName\": \"Perera\",\n  \"phone\": \"0712999999\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/api/users/me/profile", "host": ["{{baseUrl}}"], "path": ["api", "users", "me", "profile"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔑 3. Admin User Operations",
+      "item": [
+        {
+          "name": "Get All Users (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns an array of UserResponse DTOs', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+            "url": {"raw": "{{baseUrl}}/api/users", "host": ["{{baseUrl}}"], "path": ["api", "users"]}
+          }
+        },
+        {
+          "name": "Get Users Filtered by Role (Admin Query Parameter)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns an array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?role=DRIVER&status=ACTIVE",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [
+                {"key": "role", "value": "DRIVER"},
+                {"key": "status", "value": "ACTIVE"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID (Admin Path Variable)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('User ID matches path variable', () => pm.expect(pm.response.json().id).to.eql(pm.environment.get('userId')));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+            "url": {"raw": "{{baseUrl}}/api/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{userId}}"]}
+          }
+        },
+        {
+          "name": "Suspend User (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Status is SUSPENDED', () => pm.expect(pm.response.json().status).to.eql('SUSPENDED'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{adminToken}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"SUSPENDED\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/api/users/{{userId}}/status", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{userId}}", "status"]}
+          }
+        },
+        {
+          "name": "Reactivate User (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Status is ACTIVE', () => pm.expect(pm.response.json().status).to.eql('ACTIVE'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{adminToken}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/api/users/{{userId}}/status", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{userId}}", "status"]}
+          }
+        },
+        {
+          "name": "Delete Driver Account by ID (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 204 No Content', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+            ],
+            "url": {"raw": "{{baseUrl}}/api/users/{{driverId}}", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{driverId}}"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "🗑️ 4. Account Deletion (Self)",
+      "item": [
+        {
+          "name": "Delete My Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 204 No Content', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": {"raw": "{{baseUrl}}/api/users/me", "host": ["{{baseUrl}}"], "path": ["api", "users", "me"]}
+          }
+        },
+        {
+          "name": "Verify Account Deleted (Expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404 Not Found', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": {"raw": "{{baseUrl}}/api/users/me", "host": ["{{baseUrl}}"], "path": ["api", "users", "me"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ 5. Negative & Error Scenarios",
+      "item": [
+        {
+          "name": "Register – Duplicate Email (expect 409 Conflict)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 409 Conflict', () => pm.response.to.have.status(409));",
+                  "pm.test('Error message mentions email', () => pm.expect(pm.response.json().message).to.include('already registered'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Admin\",\n  \"lastName\": \"User\",\n  \"email\": \"admin@ridelink.com\",\n  \"password\": \"password123\",\n  \"phone\": \"0712345678\",\n  \"role\": \"PASSENGER\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"]}
+          }
+        },
+        {
+          "name": "Login – Wrong Password (expect 401 Unauthorized)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 401 Unauthorized', () => pm.response.to.have.status(401));",
+                  "pm.test('Generic error message (no info leak)', () => pm.expect(pm.response.json().message).to.include('Invalid email or password'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@ridelink.com\",\n  \"password\": \"WRONGPASSWORD\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"]}
+          }
+        },
+        {
+          "name": "Access Admin Endpoint as Passenger (expect 403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 403 Forbidden', () => pm.response.to.have.status(403));",
+                  "pm.test('Access denied message present', () => pm.expect(pm.response.json()).to.have.property('message'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": {"raw": "{{baseUrl}}/api/users", "host": ["{{baseUrl}}"], "path": ["api", "users"]}
+          }
+        },
+        {
+          "name": "Access Protected Endpoint Without Token (expect 401 Unauthorized)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 401 Unauthorized', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/api/users/me", "host": ["{{baseUrl}}"], "path": ["api", "users", "me"]}
+          }
+        },
+        {
+          "name": "Invalid JWT Token (expect 401 Unauthorized)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 401 Unauthorized', () => pm.response.to.have.status(401));",
+                  "pm.test('Error mentions token', () => pm.expect(pm.response.json()).to.have.property('message'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer this.is.an.invalid.token"}],
+            "url": {"raw": "{{baseUrl}}/api/users/me", "host": ["{{baseUrl}}"], "path": ["api", "users", "me"]}
+          }
+        },
+        {
+          "name": "Register – Missing Required Fields (expect 400 Bad Request)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('Field errors returned', () => pm.expect(pm.response.json()).to.have.property('fieldErrors'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"notvalidemail\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"]}
+          }
+        },
+        {
+          "name": "Get Non-Existent User (expect 404 Not Found)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404 Not Found', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+            "url": {"raw": "{{baseUrl}}/api/users/000000000000000000000000", "host": ["{{baseUrl}}"], "path": ["api", "users", "000000000000000000000000"]}
+          }
+        },
+        {
+          "name": "Delete User by ID – Forbidden as Passenger (expect 403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 403 Forbidden', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": {"raw": "{{baseUrl}}/api/users/{{driverId}}", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{driverId}}"]}
+          }
+        },
+        {
+          "name": "Delete User by ID – Non-Existent ID (expect 404 Not Found)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 404 Not Found', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+            "url": {"raw": "{{baseUrl}}/api/users/000000000000000000000000", "host": ["{{baseUrl}}"], "path": ["api", "users", "000000000000000000000000"]}
+          }
+        },
+        {
+          "name": "Delete My Account – Without Token (expect 401 Unauthorized)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 401 Unauthorized', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/api/users/me", "host": ["{{baseUrl}}"], "path": ["api", "users", "me"]}
+          }
+        }
+      ]
+    }
+  ]
+}
