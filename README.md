@@ -11,7 +11,7 @@ Backend microservices solution for a ride-sharing platform developed for **IT313
 | **1** | **Account Service** | Jayakody J A K S S | IT24100778 | ✅ Completed & Tested | `8081` |
 | **2** | **Driver & Vehicle Service** | Member 2 | IT24100687 | ✅ Completed & Tested | `8082` |
 | **3** | **Ride Management Service** | Idusara S K U | IT24101290 | In Progress | `8083` |
-| **4** | **Fare & Payment Service** | Meththasinghe M.D.D.T | IT24100891 | In Progress | `8084` |
+| **4** | **Fare & Payment Service** | Meththasinghe M.D.D.T | IT24100891 | ✅ Completed & Tested  | `8084` |
 
 ---
 
