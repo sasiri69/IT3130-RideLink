@@ -90,7 +90,7 @@ public class UserController {
 
     // ─── Own profile update (PATCH per REST standards; PUT also accepted) ──────
 
-    @PatchMapping("/me/profile")
+    @PatchMapping({"/me", "/me/profile"})
     @Operation(summary = "Partially update the currently logged-in user's profile details")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Profile updated"),
@@ -105,7 +105,7 @@ public class UserController {
         return ResponseEntity.ok(UserResponse.fromEntity(userService.updateProfile(userId, request)));
     }
 
-    @PutMapping("/me/profile")
+    @PutMapping({"/me", "/me/profile"})
     @Operation(summary = "Update profile details (PUT alias for PATCH /me/profile)")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Profile updated"),

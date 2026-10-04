@@ -2,6 +2,7 @@ package com.ridelink.account.service;
 
 import com.ridelink.account.dto.*;
 import com.ridelink.account.exception.DuplicateEmailException;
+import com.ridelink.account.exception.DuplicatePhoneException;
 import com.ridelink.account.exception.InvalidCredentialsException;
 import com.ridelink.account.exception.UserNotFoundException;
 import com.ridelink.account.model.AccountStatus;
@@ -22,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,7 +57,7 @@ class UserServiceTest {
                 .lastName("Perera")
                 .email("kamal@gmail.com")
                 .passwordHash("hashed-password")
-                .phone("0712345678")
+                .phone("+94712345678")
                 .role(Role.PASSENGER)
                 .status(AccountStatus.ACTIVE)
                 .build();
@@ -65,7 +67,7 @@ class UserServiceTest {
         registerRequest.setLastName("Perera");
         registerRequest.setEmail("kamal@gmail.com");
         registerRequest.setPassword("password123");
-        registerRequest.setPhone("0712345678");
+        registerRequest.setPhone("+94712345678");
         registerRequest.setRole(Role.PASSENGER);
 
         loginRequest = new LoginRequest();
@@ -103,6 +105,17 @@ class UserServiceTest {
         when(userRepository.existsByEmail("kamal@gmail.com")).thenReturn(true);
 
         assertThrows(DuplicateEmailException.class, () -> userService.registerUser(registerRequest));
+
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Register: duplicate phone — throws DuplicatePhoneException")
+    void register_DuplicatePhone() {
+        when(userRepository.existsByEmail("kamal@gmail.com")).thenReturn(false);
+        when(userRepository.existsByPhone("+94712345678")).thenReturn(true);
+
+        assertThrows(DuplicatePhoneException.class, () -> userService.registerUser(registerRequest));
 
         verify(userRepository, never()).save(any());
     }
@@ -227,21 +240,44 @@ class UserServiceTest {
     // ──────────────── UPDATE PROFILE ─────────────────────────────────────────
 
     @Test
-    @DisplayName("UpdateProfile: success — user fields updated")
+    @DisplayName("UpdateProfile: success — user fields updated and created date is behind updated date")
     void updateProfile_Success() {
+        sampleUser.setCreatedAt(LocalDateTime.now().minusHours(1));
         UpdateProfileRequest req = new UpdateProfileRequest();
         req.setFirstName("Nimal");
         req.setLastName("Silva");
-        req.setPhone("0771234567");
+        req.setPhone("+94771234567");
+        req.setEmail("nimal.new@gmail.com");
 
         when(userRepository.findById("user-001")).thenReturn(Optional.of(sampleUser));
+        when(userRepository.findByEmail("nimal.new@gmail.com")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         User updated = userService.updateProfile("user-001", req);
 
         assertEquals("Nimal", updated.getFirstName());
         assertEquals("Silva", updated.getLastName());
-        assertEquals("0771234567", updated.getPhone());
+        assertEquals("+94771234567", updated.getPhone());
+        assertEquals("nimal.new@gmail.com", updated.getEmail());
+        assertNotNull(updated.getCreatedAt());
+        assertNotNull(updated.getUpdatedAt());
+        assertTrue(updated.getCreatedAt().isBefore(updated.getUpdatedAt()) || updated.getCreatedAt().isEqual(updated.getUpdatedAt()));
+    }
+
+    @Test
+    @DisplayName("UpdateProfile: duplicate email throws DuplicateEmailException")
+    void updateProfile_DuplicateEmail() {
+        UpdateProfileRequest req = new UpdateProfileRequest();
+        req.setFirstName("Nimal");
+        req.setLastName("Silva");
+        req.setPhone("+94771234567");
+        req.setEmail("other@gmail.com");
+
+        User otherUser = User.builder().id("user-other").email("other@gmail.com").build();
+        when(userRepository.findById("user-001")).thenReturn(Optional.of(sampleUser));
+        when(userRepository.findByEmail("other@gmail.com")).thenReturn(Optional.of(otherUser));
+
+        assertThrows(DuplicateEmailException.class, () -> userService.updateProfile("user-001", req));
     }
 
     // ──────────────── UPDATE STATUS ──────────────────────────────────────────
