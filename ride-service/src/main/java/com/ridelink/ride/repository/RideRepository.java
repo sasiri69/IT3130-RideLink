@@ -23,4 +23,6 @@ public interface RideRepository extends MongoRepository<Ride, String> {
     List<Ride> findByStatus(RideStatus status);
 
     boolean existsByRideId(String rideId);
+
+    boolean existsByPassengerIdAndStatusIn(String passengerId, List<RideStatus> statuses);
 }

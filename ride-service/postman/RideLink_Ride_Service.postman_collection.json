@@ -1,0 +1,165 @@
+{
+  "info": {
+    "_postman_id": "ridelink-ride-service-collection",
+    "name": "RideLink – Ride Management Service (Member 3)",
+    "description": "Comprehensive API collection for Member 3 (Ride Management Service) covering ride creation, lifecycle state transitions, negative tests, and queries.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Create Ride Request",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"passengerId\": \"{{passengerId}}\",\n  \"pickupLocation\": {\n    \"latitude\": 6.9271,\n    \"longitude\": 79.8612,\n    \"addressName\": \"Colombo Fort Station\"\n  },\n  \"destinationLocation\": {\n    \"latitude\": 6.9147,\n    \"longitude\": 79.9733,\n    \"addressName\": \"SLIIT Malabe Campus\"\n  },\n  \"vehicleType\": \"CAR\",\n  \"serviceArea\": \"Colombo\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rides",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "rides"]
+        }
+      }
+    },
+    {
+      "name": "2. Get Ride Details by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/rides/{{rideId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "rides", "{{rideId}}"]
+        }
+      }
+    },
+    {
+      "name": "3. Assign Driver (Auto-Selection)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rides/{{rideId}}/assign-driver",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "rides", "{{rideId}}", "assign-driver"]
+        }
+      }
+    },
+    {
+      "name": "4. Driver Accepts Ride",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/rides/{{rideId}}/accept",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "rides", "{{rideId}}", "accept"]
+        }
+      }
+    },
+    {
+      "name": "5. Driver Starts Trip",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/rides/{{rideId}}/start",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "rides", "{{rideId}}", "start"]
+        }
+      }
+    },
+    {
+      "name": "6. Driver Completes Trip",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/rides/{{rideId}}/complete",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "rides", "{{rideId}}", "complete"]
+        }
+      }
+    },
+    {
+      "name": "7. Cancel Ride Booking",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reason\": \"Passenger requested cancellation before departure\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/rides/{{rideId}}/cancel",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "rides", "{{rideId}}", "cancel"]
+        }
+      }
+    },
+    {
+      "name": "8. Get Rides by Passenger",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/rides/passenger/{{passengerId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "rides", "passenger", "{{passengerId}}"]
+        }
+      }
+    },
+    {
+      "name": "9. Get Rides by Driver",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/rides/driver/{{driverId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "rides", "driver", "{{driverId}}"]
+        }
+      }
+    },
+    {
+      "name": "10. Negative Scenario - Invalid Transition",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/rides/{{rideId}}/complete",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "rides", "{{rideId}}", "complete"]
+        }
+      }
+    }
+  ]
+}

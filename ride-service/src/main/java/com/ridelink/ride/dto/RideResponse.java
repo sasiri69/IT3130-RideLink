@@ -36,6 +36,9 @@ public class RideResponse {
     private Double finalFare;
     private String cancellationReason;
     private String cancelledBy;
+    private String paymentId;
+    private String paymentStatus;
+    private LocalDateTime paidAt;
     private LocalDateTime requestedAt;
     private LocalDateTime assignedAt;
     private LocalDateTime acceptedAt;
@@ -84,6 +87,9 @@ public class RideResponse {
                 .finalFare(ride.getFinalFare())
                 .cancellationReason(ride.getCancellationReason())
                 .cancelledBy(ride.getCancelledBy())
+                .paymentId(ride.getPaymentId())
+                .paymentStatus(ride.getPaymentStatus())
+                .paidAt(ride.getPaidAt())
                 .requestedAt(ride.getRequestedAt())
                 .assignedAt(ride.getAssignedAt())
                 .acceptedAt(ride.getAcceptedAt())

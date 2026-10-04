@@ -4,6 +4,7 @@ import com.ridelink.ride.dto.AssignDriverRequest;
 import com.ridelink.ride.dto.CancelRideRequest;
 import com.ridelink.ride.dto.RideRequest;
 import com.ridelink.ride.dto.RideResponse;
+import com.ridelink.ride.dto.UpdateRidePaymentRequest;
 import com.ridelink.ride.model.RideStatus;
 import com.ridelink.ride.security.JwtService;
 import com.ridelink.ride.service.RideService;
@@ -58,6 +59,7 @@ public class RideController {
             @Valid @RequestBody RideRequest request,
             @RequestHeader(value = "Authorization", required = false) String authHeader
     ) {
+        validatePassengerOwnershipOrAdmin(request.getPassengerId(), authHeader);
         log.info("REST POST /api/rides - Creating ride for passenger: {}", request.getPassengerId());
         RideResponse response = rideService.createRide(request, authHeader);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -247,6 +249,7 @@ public class RideController {
             @Valid @RequestBody CancelRideRequest request,
             @RequestHeader(value = "Authorization", required = false) String authHeader
     ) {
+        validateCancelOwnershipOrAdmin(rideId, authHeader);
         String cancelledBy = extractUserIdFromHeader(authHeader);
         return ResponseEntity.ok(rideService.cancelRide(rideId, request, cancelledBy, authHeader));
     }
@@ -274,6 +277,32 @@ public class RideController {
         return ResponseEntity.ok(rideService.getAllRides(status));
     }
 
+    // ─── 11. Ride Payment Status Callback ──────────────────────────────────────
+
+    /**
+     * Updates payment status on a completed ride booking.
+     * Called by Payment Service upon successful payment recording.
+     *
+     * @param rideId Target ride ID
+     * @param request Payment update payload
+     * @return Updated ride response with payment details
+     */
+    @PatchMapping("/{rideId}/payment")
+    @Operation(summary = "Update ride payment status (called upon payment completion)")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ride payment status updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid ride state for payment (must be COMPLETED)"),
+            @ApiResponse(responseCode = "404", description = "Ride not found")
+    })
+    public ResponseEntity<RideResponse> updatePaymentStatus(
+            @PathVariable String rideId,
+            @Valid @RequestBody UpdateRidePaymentRequest request
+    ) {
+        log.info("REST PATCH /api/rides/{}/payment - Recording paymentId: {}", rideId, request.getPaymentId());
+        return ResponseEntity.ok(rideService.updatePaymentStatus(rideId, request));
+    }
+
     private String extractUserIdFromHeader(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return null;
@@ -282,6 +311,51 @@ public class RideController {
             return jwtService.extractUserId(authHeader.substring(7));
         } catch (Exception ex) {
             return null;
+        }
+    }
+
+    private void validatePassengerOwnershipOrAdmin(String passengerId, String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return;
+        }
+        String token = authHeader.substring(7);
+        try {
+            String role = jwtService.extractRole(token);
+            String tokenUserId = jwtService.extractUserId(token);
+            if (!"ADMIN".equalsIgnoreCase(role) && (tokenUserId != null && !tokenUserId.equalsIgnoreCase(passengerId))) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "Access denied: You cannot create ride bookings for another passenger's account."
+                );
+            }
+        } catch (org.springframework.security.access.AccessDeniedException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.debug("Token parsing warning during passenger check: {}", ex.getMessage());
+        }
+    }
+
+    private void validateCancelOwnershipOrAdmin(String rideId, String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return;
+        }
+        String token = authHeader.substring(7);
+        try {
+            String role = jwtService.extractRole(token);
+            String tokenUserId = jwtService.extractUserId(token);
+            if (!"ADMIN".equalsIgnoreCase(role) && tokenUserId != null) {
+                RideResponse ride = rideService.getRideById(rideId);
+                boolean isPassenger = tokenUserId.equalsIgnoreCase(ride.getPassengerId());
+                boolean isDriver = ride.getDriverId() != null && tokenUserId.equalsIgnoreCase(ride.getDriverId());
+                if (!isPassenger && !isDriver) {
+                    throw new org.springframework.security.access.AccessDeniedException(
+                            "Access denied: Only the booking passenger, assigned driver, or admin can cancel this ride."
+                    );
+                }
+            }
+        } catch (org.springframework.security.access.AccessDeniedException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.debug("Token parsing warning during cancel check: {}", ex.getMessage());
         }
     }
 }

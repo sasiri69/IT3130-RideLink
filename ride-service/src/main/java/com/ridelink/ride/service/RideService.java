@@ -51,13 +51,29 @@ public class RideService {
             throw new InvalidPassengerAccountException("Passenger account '" + passengerId + "' is not active.");
         }
 
-        // 2. Calculate trip distance
+        // 2. Prevent duplicate active rides for the same passenger
+        List<RideStatus> activeStatuses = List.of(
+                RideStatus.REQUESTED,
+                RideStatus.ASSIGNED,
+                RideStatus.ACCEPTED,
+                RideStatus.IN_PROGRESS
+        );
+        if (rideRepository.existsByPassengerIdAndStatusIn(passengerId, activeStatuses)) {
+            throw new InvalidStateTransitionException("Passenger '" + passengerId + "' already has an active ride in progress.");
+        }
+
+        // 3. Calculate trip distance and validate pickup vs destination proximity
         LocationPoint pickup = request.getPickupLocation().toEntity();
         LocationPoint destination = request.getDestinationLocation().toEntity();
         double distanceKm = calculateHaversineDistanceKm(
                 pickup.getLatitude(), pickup.getLongitude(),
                 destination.getLatitude(), destination.getLongitude()
         );
+
+        if (distanceKm < 0.1) {
+            throw new InvalidStateTransitionException("Pickup and destination coordinates cannot be identical or less than 100 meters apart.");
+        }
+
         distanceKm = Math.max(1.0, Math.round(distanceKm * 100.0) / 100.0);
 
         // 3. Compute estimated fare based on vehicle category
@@ -106,6 +122,9 @@ public class RideService {
 
         if (request != null && request.getDriverId() != null && !request.getDriverId().isBlank()) {
             assignedDriverId = request.getDriverId().trim();
+            if (!assignedDriverId.matches("^[A-Za-z0-9_-]{3,64}$")) {
+                throw new InvalidStateTransitionException("Invalid driver ID format: " + assignedDriverId);
+            }
         } else {
             // Auto-select nearest/first eligible available driver from Driver Service
             List<AvailableDriverResponse> availableDrivers = driverServiceClient.getAvailableDrivers(
@@ -220,12 +239,8 @@ public class RideService {
         ride.setCompletedAt(LocalDateTime.now());
         ride.setFinalFare(ride.getEstimatedFare());
 
-        // Interservice update 1: Driver is now available for new rides
+        // Interservice update: Driver is now available for new rides
         driverServiceClient.updateDriverAvailability(ride.getDriverId(), "AVAILABLE", authToken);
-
-        // Interservice update 2: Increment driver's totalRides and update rolling average rating
-        // (Assignment §6.2 – inter-service communication; default rating 4.0 when no passenger rating provided)
-        driverServiceClient.updateDriverStats(ride.getDriverId(), 4.0);
 
         Ride updated = rideRepository.save(ride);
         log.info("Ride {} completed. Final fare: LKR {}", rideId, ride.getFinalFare());
@@ -311,6 +326,31 @@ public class RideService {
                 .toList();
     }
 
+    /**
+     * Updates payment status and transaction reference on a completed ride.
+     *
+     * @param rideId Target ride ID
+     * @param request Payment update payload
+     * @return Updated ride response
+     */
+    public RideResponse updatePaymentStatus(String rideId, UpdateRidePaymentRequest request) {
+        Ride ride = findRideOrThrow(rideId);
+
+        if (ride.getStatus() != RideStatus.COMPLETED) {
+            throw new InvalidStateTransitionException(
+                    "Cannot update payment for ride in status: " + ride.getStatus() + ". Ride must be in COMPLETED state."
+            );
+        }
+
+        ride.setPaymentId(request.getPaymentId().trim());
+        ride.setPaymentStatus(request.getPaymentStatus().trim());
+        ride.setPaidAt(LocalDateTime.now());
+
+        Ride updated = rideRepository.save(ride);
+        log.info("Ride {} payment status updated to {} with paymentId {}", rideId, request.getPaymentStatus(), request.getPaymentId());
+        return RideResponse.fromEntity(updated);
+    }
+
     private Ride findRideOrThrow(String rideId) {
         return rideRepository.findByRideId(rideId.trim())
                 .or(() -> rideRepository.findById(rideId.trim()))
@@ -323,23 +363,23 @@ public class RideService {
 
         switch (vehicleType) {
             case BIKE -> {
-                baseFare = 100.0;
-                ratePerKm = 60.0;
+                baseFare = 150.0;
+                ratePerKm = 50.0;
             }
             case TUKTUK -> {
-                baseFare = 150.0;
-                ratePerKm = 85.0;
+                baseFare = 200.0;
+                ratePerKm = 70.0;
             }
             case VAN -> {
-                baseFare = 350.0;
-                ratePerKm = 160.0;
+                baseFare = 500.0;
+                ratePerKm = 140.0;
             }
             case CAR -> {
-                baseFare = 250.0;
-                ratePerKm = 120.0;
+                baseFare = 350.0;
+                ratePerKm = 100.0;
             }
             default -> {
-                baseFare = 200.0;
+                baseFare = 350.0;
                 ratePerKm = 100.0;
             }
         }

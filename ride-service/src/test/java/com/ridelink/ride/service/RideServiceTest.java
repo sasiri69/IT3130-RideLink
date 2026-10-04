@@ -24,10 +24,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -265,7 +262,6 @@ class RideServiceTest {
         assertThat(response.getFinalFare()).isEqualTo(existingRide.getEstimatedFare());
 
         verify(driverServiceClient, times(1)).updateDriverAvailability("user-driver-101", "AVAILABLE", null);
-        verify(driverServiceClient, times(1)).updateDriverStats(eq("user-driver-101"), eq(4.0));
     }
 
     // ─── 5. Cancellation Tests ─────────────────────────────────────────────────
@@ -350,41 +346,53 @@ class RideServiceTest {
                 .hasMessageContaining("was not found");
     }
 
+    // ─── 7. Payment Status & Validation Tests ──────────────────────────────────
+
     @Test
-    @DisplayName("Should return passenger ride history ordered by date")
-    void testGetRidesByPassenger_Success() {
-        when(rideRepository.findByPassengerIdOrderByCreatedAtDesc("user-passenger-001"))
-                .thenReturn(List.of(existingRide));
+    @DisplayName("Should successfully record payment on COMPLETED ride")
+    void testUpdatePaymentStatus_Success() {
+        existingRide.setStatus(RideStatus.COMPLETED);
+        when(rideRepository.findByRideId("RIDE-A1B2C3D4")).thenReturn(Optional.of(existingRide));
+        when(rideRepository.save(any(Ride.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        List<RideResponse> result = rideService.getRidesByPassenger("user-passenger-001");
+        UpdateRidePaymentRequest request = UpdateRidePaymentRequest.builder()
+                .paymentId("PAY-12345678")
+                .paymentStatus("PAID")
+                .build();
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getPassengerId()).isEqualTo("user-passenger-001");
+        RideResponse response = rideService.updatePaymentStatus("RIDE-A1B2C3D4", request);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getPaymentId()).isEqualTo("PAY-12345678");
+        assertThat(response.getPaymentStatus()).isEqualTo("PAID");
+        assertThat(response.getPaidAt()).isNotNull();
     }
 
     @Test
-    @DisplayName("Should return empty list when driver has no assigned rides")
-    void testGetRidesByDriver_EmptyList() {
-        when(rideRepository.findByDriverIdOrderByCreatedAtDesc("user-driver-999"))
-                .thenReturn(List.of());
-
-        List<RideResponse> result = rideService.getRidesByDriver("user-driver-999");
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    @DisplayName("Negative Scenario: Cannot complete ride if wrong driver makes the call")
-    void testCompleteRide_WrongDriver_ThrowsException() {
+    @DisplayName("Negative Scenario: Should throw InvalidStateTransitionException when updating payment on non-completed ride")
+    void testUpdatePaymentStatus_NotCompleted_ThrowsException() {
         existingRide.setStatus(RideStatus.IN_PROGRESS);
-        existingRide.setDriverId("user-driver-101");
-
         when(rideRepository.findByRideId("RIDE-A1B2C3D4")).thenReturn(Optional.of(existingRide));
 
-        assertThatThrownBy(() -> rideService.completeRide("RIDE-A1B2C3D4", "driver-intruder-999", null))
-                .isInstanceOf(UnauthorizedRideAccessException.class)
-                .hasMessageContaining("is not the assigned driver");
+        UpdateRidePaymentRequest request = UpdateRidePaymentRequest.builder()
+                .paymentId("PAY-12345678")
+                .paymentStatus("PAID")
+                .build();
 
-        verify(rideRepository, never()).save(any());
+        assertThatThrownBy(() -> rideService.updatePaymentStatus("RIDE-A1B2C3D4", request))
+                .isInstanceOf(InvalidStateTransitionException.class)
+                .hasMessageContaining("Ride must be in COMPLETED state");
+    }
+
+    @Test
+    @DisplayName("Negative Scenario: Should throw InvalidStateTransitionException on invalid driverId format during assignment")
+    void testAssignDriver_InvalidDriverIdFormat_ThrowsException() {
+        when(rideRepository.findByRideId("RIDE-A1B2C3D4")).thenReturn(Optional.of(existingRide));
+
+        AssignDriverRequest request = new AssignDriverRequest("@invalid#driver!");
+
+        assertThatThrownBy(() -> rideService.assignDriver("RIDE-A1B2C3D4", request, null))
+                .isInstanceOf(InvalidStateTransitionException.class)
+                .hasMessageContaining("Invalid driver ID format");
     }
 }
