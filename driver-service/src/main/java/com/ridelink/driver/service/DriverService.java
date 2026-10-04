@@ -222,7 +222,7 @@ public class DriverService {
         DriverStatus targetStatus = request.getStatus();
 
         // Enforce business state transition rules
-        if (currentStatus == DriverStatus.SUSPENDED && targetStatus == DriverStatus.AVAILABLE) {
+        if (currentStatus == DriverStatus.SUSPENDED && targetStatus != DriverStatus.SUSPENDED) {
             throw new InvalidStatusTransitionException(
                     "Driver account is SUSPENDED and cannot declare availability. Contact support."
             );
