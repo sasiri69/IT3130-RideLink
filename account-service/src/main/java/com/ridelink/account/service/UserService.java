@@ -6,6 +6,7 @@ import com.ridelink.account.dto.RegisterRequest;
 import com.ridelink.account.dto.StatusUpdateRequest;
 import com.ridelink.account.dto.UpdateProfileRequest;
 import com.ridelink.account.exception.DuplicateEmailException;
+import com.ridelink.account.exception.DuplicatePhoneException;
 import com.ridelink.account.exception.InvalidCredentialsException;
 import com.ridelink.account.exception.UserNotFoundException;
 import com.ridelink.account.model.AccountStatus;
@@ -27,6 +28,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -46,6 +48,13 @@ public class UserService {
     public AuthResponse registerUser(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateEmailException("Email " + request.getEmail() + " is already registered!");
+        }
+
+        if (request.getPhone() != null && !request.getPhone().trim().isBlank()) {
+            String phone = request.getPhone().trim();
+            if (userRepository.existsByPhone(phone)) {
+                throw new DuplicatePhoneException("Phone number " + phone + " is already registered!");
+            }
         }
 
         User user = User.builder()
@@ -146,15 +155,67 @@ public class UserService {
         User user = getUserById(id);
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
-        user.setPhone(request.getPhone());
-        user.setUpdatedAt(LocalDateTime.now());
+
+        // Handle phone update safely without false duplicate error
+        if (request.getPhone() != null && !request.getPhone().trim().isBlank()) {
+            String newPhone = request.getPhone().trim();
+            if (!newPhone.equalsIgnoreCase(user.getPhone() != null ? user.getPhone() : "")) {
+                Optional<User> existingUserWithPhone = userRepository.findByPhone(newPhone);
+                if (existingUserWithPhone.isPresent() && !existingUserWithPhone.get().getId().equals(user.getId())) {
+                    throw new DuplicatePhoneException("Phone number is already registered: " + newPhone);
+                }
+                user.setPhone(newPhone);
+            }
+        } else {
+            user.setPhone(request.getPhone());
+        }
+
+        // Handle email update safely without false duplicate error
+        if (request.getEmail() != null && !request.getEmail().trim().isBlank()) {
+            String newEmail = request.getEmail().trim();
+            // Only check duplicate if the email is actually changed
+            if (!newEmail.equalsIgnoreCase(user.getEmail())) {
+                Optional<User> existingUser = userRepository.findByEmail(newEmail);
+                if (existingUser.isPresent() && !existingUser.get().getId().equals(user.getId())) {
+                    throw new DuplicateEmailException("Email is already registered: " + newEmail);
+                }
+                user.setEmail(newEmail);
+            }
+        }
+
+        // Validate and guarantee created date is behind updated date
+        LocalDateTime now = LocalDateTime.now();
+        if (user.getCreatedAt() == null) {
+            user.setCreatedAt(now.minusSeconds(1));
+        }
+
+        if (now.isBefore(user.getCreatedAt())) {
+            user.setUpdatedAt(user.getCreatedAt().plusNanos(1_000_000));
+        } else {
+            user.setUpdatedAt(now);
+        }
+
+        if (user.getCreatedAt().isAfter(user.getUpdatedAt())) {
+            throw new IllegalArgumentException("Created date must be behind updated date");
+        }
+
         return userRepository.save(user);
     }
 
     public User updateAccountStatus(String id, StatusUpdateRequest request) {
         User user = getUserById(id);
         user.setStatus(request.getStatus());
-        user.setUpdatedAt(LocalDateTime.now());
+
+        LocalDateTime now = LocalDateTime.now();
+        if (user.getCreatedAt() == null) {
+            user.setCreatedAt(now.minusSeconds(1));
+        }
+        if (now.isBefore(user.getCreatedAt())) {
+            user.setUpdatedAt(user.getCreatedAt().plusNanos(1_000_000));
+        } else {
+            user.setUpdatedAt(now);
+        }
+
         return userRepository.save(user);
     }
 

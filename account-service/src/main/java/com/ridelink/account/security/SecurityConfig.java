@@ -24,6 +24,19 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE);
+                    java.util.Map<String, Object> body = java.util.Map.of(
+                        "timestamp", java.time.LocalDateTime.now().toString(),
+                        "status", 401,
+                        "error", "Unauthorized",
+                        "message", "Unauthorized: Authentication token is required"
+                    );
+                    new com.fasterxml.jackson.databind.ObjectMapper().writeValue(response.getWriter(), body);
+                })
+            )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/api/auth/**",
