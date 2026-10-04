@@ -50,6 +50,13 @@ public class Ride {
     private String cancellationReason;
     private String cancelledBy;
 
+    private String paymentId;
+
+    @Builder.Default
+    private String paymentStatus = "UNPAID";
+
+    private LocalDateTime paidAt;
+
     private LocalDateTime requestedAt;
     private LocalDateTime assignedAt;
     private LocalDateTime acceptedAt;
