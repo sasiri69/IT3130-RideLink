@@ -47,18 +47,50 @@ public class PaymentService {
         String passengerId = request.getPassengerId().trim();
         log.info("Processing payment for ride: {}, passenger: {}, amount: {}", rideId, passengerId, request.getAmount());
 
-        // 1. Fast-fail: Check for duplicate payment BEFORE making expensive inter-service calls
+        // 1. Verify passenger account exists with Account Service
+        accountServiceClient.getPassengerById(passengerId, authToken);
+
+        // 2. Verify ride exists with Ride Management Service
+        RideClientResponse ride = rideServiceClient.getRideById(rideId, authToken);
+
+        // Validate ride lifecycle status: payment can only be processed once ride is COMPLETED
+        if (ride != null && ride.getStatus() != null && !"COMPLETED".equalsIgnoreCase(ride.getStatus())) {
+            throw new InvalidPaymentRequestException(
+                    "Cannot process payment. Ride must be in 'COMPLETED' status (current status: " + ride.getStatus() + ")."
+            );
+        }
+
+        // Validate passenger matches the booking on the ride
+        if (ride != null && ride.getPassengerId() != null && !passengerId.equalsIgnoreCase(ride.getPassengerId().trim())) {
+            throw new InvalidPaymentRequestException(
+                    "Mismatched passenger: Passenger '" + passengerId + "' does not match the passenger who booked ride '" + rideId + "'."
+            );
+        }
+
+        // Validate payment amount consistency with ride fare
+        Double expectedFare = (ride != null && ride.getFinalFare() != null) ? ride.getFinalFare()
+                : (ride != null ? ride.getEstimatedFare() : null);
+        if (expectedFare != null && Math.abs(request.getAmount() - expectedFare) > 1.0) {
+            throw new InvalidPaymentRequestException(
+                    "Payment amount LKR " + request.getAmount() + " does not match ride fare LKR " + expectedFare + "."
+            );
+        }
+
+        // 3. Ensure ride has not already been paid for
         if (paymentRepository.existsByRideIdAndStatus(rideId, PaymentStatus.COMPLETED)) {
             throw new DuplicatePaymentException("Payment has already been completed for ride ID: " + rideId);
         }
 
-        // 2. Verify passenger account exists with Account Service
-        accountServiceClient.getPassengerById(passengerId, authToken);
+        // 4. Validate simulated card format if CARD payment method is selected
+        if (request.getPaymentMethod() == PaymentMethod.CARD
+                && request.getSimulatedCardNumber() != null
+                && !request.getSimulatedCardNumber().trim().isBlank()) {
+            if (!request.getSimulatedCardNumber().trim().matches("^\\d{16}$")) {
+                throw new InvalidPaymentRequestException("Invalid card format: Simulated card number must be 16 numeric digits.");
+            }
+        }
 
-        // 3. Verify ride exists with Ride Management Service
-        RideClientResponse ride = rideServiceClient.getRideById(rideId, authToken);
-
-        // 4. Check for simulated card failure (e.g. card ending in '0000')
+        // 5. Check for simulated card failure (e.g. card ending in '0000')
         if (request.getPaymentMethod() == PaymentMethod.CARD
                 && request.getSimulatedCardNumber() != null
                 && request.getSimulatedCardNumber().trim().endsWith("0000")) {
@@ -111,6 +143,10 @@ public class PaymentService {
 
         Payment saved = paymentRepository.save(payment);
         log.info("Payment successfully processed and saved with ID: {}", saved.getPaymentId());
+
+        // Interservice update: notify Ride Management Service of successful payment
+        rideServiceClient.updateRidePaymentStatus(rideId, saved.getPaymentId(), "PAID", authToken);
+
         return PaymentResponse.fromEntity(saved);
     }
 
