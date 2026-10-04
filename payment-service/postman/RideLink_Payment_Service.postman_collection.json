@@ -1,0 +1,222 @@
+{
+  "info": {
+    "name": "RideLink Fare & Payment Service (Member 4)",
+    "_postman_id": "4b63cf81-f25b-432a-bc91-37d45e548234",
+    "description": "Postman API collection for Member 4: Fare and Payment Management Service (IT24100891)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Fare Estimation",
+      "item": [
+        {
+          "name": "Estimate Fare - CAR (Direct Distance)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleType\": \"CAR\",\n  \"directDistanceKm\": 12.5,\n  \"surgeMultiplier\": 1.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/fares/estimate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "fares", "estimate"]
+            }
+          }
+        },
+        {
+          "name": "Estimate Fare - TUKTUK (Coordinates)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleType\": \"TUKTUK\",\n  \"pickupLatitude\": 6.9271,\n  \"pickupLongitude\": 79.8612,\n  \"destinationLatitude\": 6.9147,\n  \"destinationLongitude\": 79.9729,\n  \"surgeMultiplier\": 1.2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/fares/estimate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "fares", "estimate"]
+            }
+          }
+        },
+        {
+          "name": "Negative: Invalid Estimation (Negative Distance)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleType\": \"BIKE\",\n  \"directDistanceKm\": -5.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/fares/estimate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "fares", "estimate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Payments & Receipts",
+      "item": [
+        {
+          "name": "Process Payment - Success (CARD)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rideId\": \"{{rideId}}\",\n  \"passengerId\": \"{{passengerId}}\",\n  \"amount\": 1500.0,\n  \"paymentMethod\": \"CARD\",\n  \"simulatedCardNumber\": \"4111222233334444\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/{{paymentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{paymentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment by Ride ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/ride/{{rideId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "ride", "{{rideId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Receipt",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/{{paymentId}}/receipt",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{paymentId}}", "receipt"]
+            }
+          }
+        },
+        {
+          "name": "Negative: Card Declined (Ends in 0000)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rideId\": \"RIDE-FAIL-01\",\n  \"passengerId\": \"{{passengerId}}\",\n  \"amount\": 1200.0,\n  \"paymentMethod\": \"CARD\",\n  \"simulatedCardNumber\": \"4111222233330000\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"]
+            }
+          }
+        },
+        {
+          "name": "Negative: Duplicate Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rideId\": \"{{rideId}}\",\n  \"passengerId\": \"{{passengerId}}\",\n  \"amount\": 1500.0,\n  \"paymentMethod\": \"CASH\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"]
+            }
+          }
+        },
+        {
+          "name": "Refund Payment (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Duplicate ride billing reported by customer\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/{{paymentId}}/refund",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{paymentId}}", "refund"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
