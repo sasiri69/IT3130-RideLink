@@ -1,0 +1,4255 @@
+{
+  "info": {
+    "_postman_id": "ridelink-all-members-2024",
+    "name": "RideLink - Complete API Collection (All 4 Members)",
+    "description": "Account Service(8081) + Driver Service(8082) + Ride Service(8083) + Payment Service(8084). Covers all positive and negative test scenarios with automated assertions.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "account_url",
+      "value": "http://localhost:8081",
+      "type": "string"
+    },
+    {
+      "key": "driver_url",
+      "value": "http://localhost:8082",
+      "type": "string"
+    },
+    {
+      "key": "ride_url",
+      "value": "http://localhost:8083",
+      "type": "string"
+    },
+    {
+      "key": "payment_url",
+      "value": "http://localhost:8084",
+      "type": "string"
+    },
+    {
+      "key": "passenger_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "driver_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "passenger_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "driver_account_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ride_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "payment_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "M1 - Account Service (Port 8081)",
+      "item": [
+        {
+          "name": "[POS] Delete My Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 204', () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/users/me",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Admin - Delete User By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 204', () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/users/{{passenger_id}}",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{passenger_id}}"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Register Passenger",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.environment.set('passenger_token', b.accessToken);",
+                  "pm.collectionVariables.set('passenger_token', b.accessToken);",
+                  "pm.environment.set('passenger_id', b.userId);",
+                  "pm.collectionVariables.set('passenger_id', b.userId);",
+                  "pm.environment.set('refresh_token', b.refreshToken);",
+                  "pm.collectionVariables.set('refresh_token', b.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/auth/register",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"firstName\": \"Kamal\", \"lastName\": \"Perera\", \"email\": \"kamal.perera@gmail.com\", \"password\": \"SecurePass123\", \"phone\": \"+94771234567\", \"role\": \"PASSENGER\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Register Driver Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.environment.set('driver_token', b.accessToken);",
+                  "pm.collectionVariables.set('driver_token', b.accessToken);",
+                  "pm.environment.set('driver_account_id', b.userId);",
+                  "pm.collectionVariables.set('driver_account_id', b.userId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/auth/register",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"firstName\": \"Nimal\", \"lastName\": \"Silva\", \"email\": \"nimal.driver@gmail.com\", \"password\": \"DriverPass456\", \"phone\": \"+94779876543\", \"role\": \"DRIVER\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Register Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('admin_token', pm.response.json().accessToken);",
+                  "pm.collectionVariables.set('admin_token', pm.response.json().accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/auth/register",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"firstName\": \"Admin\", \"lastName\": \"RideLink\", \"email\": \"admin@ridelink.lk\", \"password\": \"Admin@Secure789\", \"phone\": \"+94700000001\", \"role\": \"ADMIN\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Register - Duplicate Email (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/auth/register",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"firstName\": \"Kamal\", \"lastName\": \"Perera\", \"email\": \"kamal.perera@gmail.com\", \"password\": \"SecurePass123\", \"phone\": \"+94771234567\", \"role\": \"PASSENGER\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Register - Bad Fields (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/auth/register",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"firstName\": \"\", \"email\": \"bademail\", \"password\": \"123\", \"role\": \"PASSENGER\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Register - Invalid Phone Format (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/auth/register",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"firstName\": \"Test\", \"lastName\": \"User\", \"email\": \"phone.test@gmail.com\", \"password\": \"Password123\", \"phone\": \"0771234567\", \"role\": \"PASSENGER\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Register - Invalid Email Format (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/auth/register",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"firstName\": \"Test\", \"lastName\": \"User\", \"email\": \"not-an-email\", \"password\": \"Password123\", \"phone\": \"+94771234567\", \"role\": \"PASSENGER\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Login Passenger",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.environment.set('passenger_token', b.accessToken);",
+                  "pm.collectionVariables.set('passenger_token', b.accessToken);",
+                  "pm.environment.set('passenger_id', b.userId);",
+                  "pm.collectionVariables.set('passenger_id', b.userId);",
+                  "pm.environment.set('refresh_token', b.refreshToken);",
+                  "pm.collectionVariables.set('refresh_token', b.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/auth/login",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"kamal.perera@gmail.com\", \"password\": \"SecurePass123\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Login Driver",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.environment.set('driver_token', b.accessToken);",
+                  "pm.collectionVariables.set('driver_token', b.accessToken);",
+                  "pm.environment.set('driver_account_id', b.userId);",
+                  "pm.collectionVariables.set('driver_account_id', b.userId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/auth/login",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"nimal.driver@gmail.com\", \"password\": \"DriverPass456\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('admin_token', pm.response.json().accessToken);",
+                  "pm.collectionVariables.set('admin_token', pm.response.json().accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/auth/login",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"admin@ridelink.lk\", \"password\": \"Admin@Secure789\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Login - Wrong Password (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/auth/login",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"kamal.perera@gmail.com\", \"password\": \"WrongPassword!\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Login - Non-Existent User (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/auth/login",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"ghost@ridelink.lk\", \"password\": \"SomePass123\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('passenger_token', pm.response.json().accessToken);",
+                  "pm.collectionVariables.set('passenger_token', pm.response.json().accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/auth/refresh",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"refreshToken\": \"{{refresh_token}}\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Refresh Token - Invalid (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/auth/refresh",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"refreshToken\": \"invalid.fake.token\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Get My Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has email', () => pm.expect(pm.response.json().email).to.exist);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/users/me",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[NEG] Get My Profile - No Token (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{account_url}}/api/users/me",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Update My Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('Email updated or retained', () => pm.expect(b.email).to.equal('kamal.perera@gmail.com'));",
+                  "pm.test('Created date is behind updated date', () => {",
+                  "    pm.expect(b.createdAt).to.exist;",
+                  "    pm.expect(b.updatedAt).to.exist;",
+                  "    const createdTime = new Date(b.createdAt).getTime();",
+                  "    const updatedTime = new Date(b.updatedAt).getTime();",
+                  "    pm.expect(createdTime).to.be.at.most(updatedTime);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/users/me/profile",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me",
+                "profile"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"firstName\": \"Kamal\", \"lastName\": \"Fernando\", \"phone\": \"+94771234999\", \"email\": \"kamal.perera@gmail.com\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Update Profile - Empty Fields (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/users/me/profile",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me",
+                "profile"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"firstName\": \"\", \"lastName\": \"\", \"phone\": \"\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Update Profile - Invalid Phone Format (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/users/me/profile",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me",
+                "profile"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"firstName\": \"Kamal\", \"lastName\": \"Fernando\", \"phone\": \"0771234567\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Update Profile - Duplicate Email (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/users/me/profile",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me",
+                "profile"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"firstName\": \"Kamal\", \"lastName\": \"Fernando\", \"phone\": \"+94771234999\", \"email\": \"admin@ridelink.lk\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Admin - Get All Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/users",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Admin - Get Users Filter PASSENGER",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/users?role=PASSENGER",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "PASSENGER"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "[NEG] Admin - Get Users NonAdmin (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/users",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Admin - Get User By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/users/{{passenger_id}}",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{passenger_id}}"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[NEG] Admin - Get User NotFound (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/users/nonexistent-id-000",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "nonexistent-id-000"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Admin - Suspend User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is SUSPENDED', () => pm.expect(pm.response.json().status).to.equal('SUSPENDED'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/users/{{passenger_id}}/status",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{passenger_id}}",
+                "status"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"SUSPENDED\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Admin - Restore User ACTIVE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is ACTIVE', () => pm.expect(pm.response.json().status).to.equal('ACTIVE'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/users/{{passenger_id}}/status",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{passenger_id}}",
+                "status"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"ACTIVE\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Admin - Status Invalid Value (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => {",
+                  "    if (pm.response.code === 401) {",
+                  "        pm.expect.fail('Received 401 Unauthorized: Please run [POS] Login Admin first to populate admin_token!');",
+                  "    }",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "if (!pm.environment.get('passenger_id') && !pm.collectionVariables.get('passenger_id')) {",
+                  "    pm.environment.set('passenger_id', '000000000000000000000000');",
+                  "    pm.collectionVariables.set('passenger_id', '000000000000000000000000');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/users/{{passenger_id}}/status",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{passenger_id}}",
+                "status"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"INVALID_STATUS\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{account_url}}/api/auth/logout",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[NEG] Logout - No Token (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{account_url}}/api/auth/logout",
+              "host": [
+                "{{account_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ],
+              "query": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "M2 - Driver Service (Port 8082)",
+      "item": [
+        {
+          "name": "[POS] Add Vehicle To Driver",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/{{driver_account_id}}/vehicle",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driver_account_id}}",
+                "vehicle"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"make\": \"Toyota\", \"model\": \"Prius\", \"year\": 2021, \"licensePlate\": \"WP-CAD-9999\", \"color\": \"Black\", \"vehicleType\": \"CAR\", \"seatingCapacity\": 4}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Remove Driver Vehicle",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 204', () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/{{driver_account_id}}/vehicle",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driver_account_id}}",
+                "vehicle"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Update Driver Trip Stats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/{{driver_account_id}}/stats",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driver_account_id}}",
+                "stats"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"completedTrips\": 10, \"rating\": 4.9}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Register Driver Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"driverId\": \"{{driver_account_id}}\", \"licenseNumber\": \"B1234567\", \"serviceArea\": \"Colombo\", \"vehicle\": {\"make\": \"Toyota\", \"model\": \"Prius\", \"year\": 2020, \"licensePlate\": \"WP-CAB-1234\", \"color\": \"White\", \"vehicleType\": \"CAR\", \"seatingCapacity\": 4}, \"initialLocation\": {\"latitude\": 6.9271, \"longitude\": 79.8612, \"addressName\": \"Colombo Fort\"}}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Register Driver - Invalid License (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"driverId\": \"{{driver_account_id}}\", \"licenseNumber\": \"invalid!!\", \"serviceArea\": \"Colombo\", \"vehicle\": {\"make\": \"Toyota\", \"model\": \"Prius\", \"year\": 2020, \"licensePlate\": \"WP-CAB-1234\", \"color\": \"White\", \"vehicleType\": \"CAR\", \"seatingCapacity\": 4}}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Register Driver - Duplicate (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"driverId\": \"{{driver_account_id}}\", \"licenseNumber\": \"B1234567\", \"serviceArea\": \"Colombo\", \"vehicle\": {\"make\": \"Toyota\", \"model\": \"Prius\", \"year\": 2020, \"licensePlate\": \"WP-CAB-1234\", \"color\": \"White\", \"vehicleType\": \"CAR\", \"seatingCapacity\": 4}}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Get My Driver Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/me",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "me"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Get Driver By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/{{driver_account_id}}",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driver_account_id}}"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[NEG] Get Driver By ID - NotFound (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/nonexistent-driver",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "nonexistent-driver"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Set Availability AVAILABLE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is AVAILABLE', () => pm.expect(pm.response.json().status).to.equal('AVAILABLE'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/{{driver_account_id}}/availability",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driver_account_id}}",
+                "availability"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"AVAILABLE\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Set Availability OFFLINE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/{{driver_account_id}}/availability",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driver_account_id}}",
+                "availability"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"OFFLINE\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Availability - Invalid Status (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/{{driver_account_id}}/availability",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driver_account_id}}",
+                "availability"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"SUPER_BUSY\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Update Location",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/{{driver_account_id}}/location",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driver_account_id}}",
+                "location"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"latitude\": 6.9271, \"longitude\": 79.8612, \"addressName\": \"Colombo Fort Station\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Update Location - Bad Coords (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/{{driver_account_id}}/location",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driver_account_id}}",
+                "location"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"latitude\": 999.0, \"longitude\": 999.0}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Update Service Area",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/{{driver_account_id}}/service-area",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driver_account_id}}",
+                "service-area"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"serviceArea\": \"Malabe\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Get Vehicle Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/{{driver_account_id}}/vehicle",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driver_account_id}}",
+                "vehicle"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Update Vehicle",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/{{driver_account_id}}/vehicle",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driver_account_id}}",
+                "vehicle"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"make\": \"Toyota\", \"model\": \"Aqua\", \"year\": 2021, \"licensePlate\": \"WP-CAB-1234\", \"color\": \"Silver\", \"vehicleType\": \"CAR\", \"seatingCapacity\": 4}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Update Vehicle - Invalid Year (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/{{driver_account_id}}/vehicle",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driver_account_id}}",
+                "vehicle"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"make\": \"Toyota\", \"model\": \"Old\", \"year\": 1980, \"licensePlate\": \"X\", \"color\": \"Rust\", \"vehicleType\": \"CAR\", \"seatingCapacity\": 0}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Get Available Drivers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/available?serviceArea=Colombo&vehicleType=CAR",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "available"
+              ],
+              "query": [
+                {
+                  "key": "serviceArea",
+                  "value": "Colombo"
+                },
+                {
+                  "key": "vehicleType",
+                  "value": "CAR"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "[POS] Get Nearby Drivers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/nearby?latitude=6.9271&longitude=79.8612&radiusKm=10",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "nearby"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "6.9271"
+                },
+                {
+                  "key": "longitude",
+                  "value": "79.8612"
+                },
+                {
+                  "key": "radiusKm",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "[NEG] Nearby Drivers - Missing Coords (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/nearby",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "nearby"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Admin - List All Drivers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[NEG] Admin - List Drivers NonAdmin (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Admin - Suspend Driver",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/{{driver_account_id}}/admin-status",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driver_account_id}}",
+                "admin-status"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"SUSPENDED\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Admin - Restore Driver AVAILABLE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{driver_url}}/api/drivers/{{driver_account_id}}/admin-status",
+              "host": [
+                "{{driver_url}}"
+              ],
+              "path": [
+                "api",
+                "drivers",
+                "{{driver_account_id}}",
+                "admin-status"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"AVAILABLE\"}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "M3 - Ride Service (Port 8083)",
+      "item": [
+        {
+          "name": "[POS] Get Driver Assigned Rides",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/driver/{{driver_account_id}}",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "driver",
+                "{{driver_account_id}}"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Inter-Service Update Payment Status to PAID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/{{ride_id}}/payment",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "{{ride_id}}",
+                "payment"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"paymentStatus\": \"PAID\", \"paymentId\": \"PAY-4C9E51EE\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Book a Ride",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.environment.set('ride_id', b.rideId || b.id);",
+                  "pm.collectionVariables.set('ride_id', b.rideId || b.id);",
+                  "pm.test('Is REQUESTED', () => pm.expect(b.status).to.equal('REQUESTED'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"passengerId\": \"{{passenger_id}}\", \"pickupLocation\": {\"latitude\": 6.9271, \"longitude\": 79.8612, \"addressName\": \"Colombo Fort\"}, \"destinationLocation\": {\"latitude\": 6.9147, \"longitude\": 79.9729, \"addressName\": \"Malabe Junction\"}, \"vehicleType\": \"CAR\", \"serviceArea\": \"Colombo\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Book Ride - Missing PassengerID (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"passengerId\": \"\", \"pickupLocation\": {\"latitude\": 6.9271, \"longitude\": 79.8612, \"addressName\": \"Colombo\"}, \"destinationLocation\": {\"latitude\": 6.9147, \"longitude\": 79.9729, \"addressName\": \"Malabe\"}, \"vehicleType\": \"CAR\", \"serviceArea\": \"Colombo\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Book Ride - Bad Coordinates (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"passengerId\": \"{{passenger_id}}\", \"pickupLocation\": {\"latitude\": 999.0, \"longitude\": 999.0, \"addressName\": \"Bad\"}, \"destinationLocation\": {\"latitude\": 6.9147, \"longitude\": 79.9729, \"addressName\": \"Malabe\"}, \"vehicleType\": \"CAR\", \"serviceArea\": \"Colombo\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Get Ride By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/{{ride_id}}",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "{{ride_id}}"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[NEG] Get Ride By ID - NotFound (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/nonexistent-ride-9999",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "nonexistent-ride-9999"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Get Passenger Ride History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/passenger/{{passenger_id}}",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "passenger",
+                "{{passenger_id}}"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Assign Driver - Manual",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is ASSIGNED', () => pm.expect(pm.response.json().status).to.equal('ASSIGNED'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/{{ride_id}}/assign-driver",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "{{ride_id}}",
+                "assign-driver"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"driverId\": \"{{driver_account_id}}\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Assign Driver - Auto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is ASSIGNED', () => pm.expect(pm.response.json().status).to.equal('ASSIGNED'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/{{ride_id}}/assign-driver",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "{{ride_id}}",
+                "assign-driver"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Assign Driver - Already Assigned (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/{{ride_id}}/assign-driver",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "{{ride_id}}",
+                "assign-driver"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Driver Accepts Ride",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is ACCEPTED', () => pm.expect(pm.response.json().status).to.equal('ACCEPTED'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/{{ride_id}}/accept",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "{{ride_id}}",
+                "accept"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[NEG] Driver Accept - Wrong Driver (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/{{ride_id}}/accept",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "{{ride_id}}",
+                "accept"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Start Ride",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is IN_PROGRESS', () => pm.expect(pm.response.json().status).to.equal('IN_PROGRESS'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/{{ride_id}}/start",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "{{ride_id}}",
+                "start"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[NEG] Start Ride - NotFound (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('400 or 404', () => pm.expect(pm.response.code).to.be.oneOf([400, 404]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/fake-ride-id/start",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "fake-ride-id",
+                "start"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Complete Ride",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is COMPLETED', () => pm.expect(pm.response.json().status).to.equal('COMPLETED'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/{{ride_id}}/complete",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "{{ride_id}}",
+                "complete"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[NEG] Complete Ride - Already Completed (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{driver_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/{{ride_id}}/complete",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "{{ride_id}}",
+                "complete"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Cancel Ride - REQUESTED Ride",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is CANCELLED', () => pm.expect(pm.response.json().status).to.equal('CANCELLED'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/{{ride_id}}/cancel",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "{{ride_id}}",
+                "cancel"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reason\": \"Passenger changed plans\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Cancel Ride - Already Completed (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/{{ride_id}}/cancel",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "{{ride_id}}",
+                "cancel"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reason\": \"Try to cancel completed ride\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Cancel Ride - Missing Reason (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides/{{ride_id}}/cancel",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides",
+                "{{ride_id}}",
+                "cancel"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reason\": \"\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Admin - Get All Rides",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Admin - Get All Rides Filter COMPLETED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides?status=COMPLETED",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "COMPLETED"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "[NEG] Admin - Get All Rides NonAdmin (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{ride_url}}/api/rides",
+              "host": [
+                "{{ride_url}}"
+              ],
+              "path": [
+                "api",
+                "rides"
+              ],
+              "query": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "M4 - Payment Service (Port 8084)",
+      "item": [
+        {
+          "name": "[POS] Fare Estimate - CAR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/fares/estimate",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "fares",
+                "estimate"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pickupLatitude\": 6.9271, \"pickupLongitude\": 79.8612, \"pickupAddress\": \"Colombo Fort\", \"destinationLatitude\": 6.9147, \"destinationLongitude\": 79.9729, \"destinationAddress\": \"Malabe Junction\", \"vehicleType\": \"CAR\", \"surgeMultiplier\": 1.0}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Fare Estimate - VAN with 1.5x Surge",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/fares/estimate",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "fares",
+                "estimate"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pickupLatitude\": 6.9271, \"pickupLongitude\": 79.8612, \"pickupAddress\": \"Colombo Fort\", \"destinationLatitude\": 7.2906, \"destinationLongitude\": 80.6337, \"destinationAddress\": \"Kandy City Center\", \"vehicleType\": \"VAN\", \"surgeMultiplier\": 1.5}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Fare Estimate - TUKTUK",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/fares/estimate",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "fares",
+                "estimate"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pickupLatitude\": 6.9271, \"pickupLongitude\": 79.8612, \"pickupAddress\": \"Colombo Fort\", \"destinationLatitude\": 6.9022, \"destinationLongitude\": 79.8613, \"destinationAddress\": \"Dehiwala\", \"vehicleType\": \"TUKTUK\", \"surgeMultiplier\": 1.0}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Fare Estimate - BIKE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/fares/estimate",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "fares",
+                "estimate"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pickupLatitude\": 6.9271, \"pickupLongitude\": 79.8612, \"pickupAddress\": \"Colombo Fort\", \"destinationLatitude\": 6.935, \"destinationLongitude\": 79.85, \"destinationAddress\": \"Pettah\", \"vehicleType\": \"BIKE\", \"surgeMultiplier\": 1.0}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Fare Estimate - Bad Coordinates (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/fares/estimate",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "fares",
+                "estimate"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pickupLatitude\": -999.0, \"pickupLongitude\": 999.0, \"vehicleType\": \"CAR\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Fare Estimate - Missing Vehicle Type (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/fares/estimate",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "fares",
+                "estimate"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pickupLatitude\": 6.9271, \"pickupLongitude\": 79.8612, \"destinationLatitude\": 6.9147, \"destinationLongitude\": 79.9729}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Fare Estimate - Surge > 3.0 (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/fares/estimate",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "fares",
+                "estimate"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pickupLatitude\": 6.9271, \"pickupLongitude\": 79.8612, \"destinationLatitude\": 6.9147, \"destinationLongitude\": 79.9729, \"vehicleType\": \"CAR\", \"surgeMultiplier\": 5.0}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Process Payment - CARD",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.environment.set('payment_id', b.paymentId);",
+                  "pm.collectionVariables.set('payment_id', b.paymentId);",
+                  "pm.test('Is COMPLETED', () => pm.expect(b.status).to.equal('COMPLETED'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/payments",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"rideId\": \"{{ride_id}}\", \"passengerId\": \"{{passenger_id}}\", \"amount\": 850.0, \"paymentMethod\": \"CARD\", \"simulatedCardNumber\": \"4111111111111111\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Process Payment - CASH",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('payment_id', pm.response.json().paymentId);",
+                  "pm.collectionVariables.set('payment_id', pm.response.json().paymentId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/payments",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"rideId\": \"{{ride_id}}\", \"passengerId\": \"{{passenger_id}}\", \"amount\": 650.0, \"paymentMethod\": \"CASH\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Process Payment - Declined Card (402)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 402', () => pm.response.to.have.status(402));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/payments",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"rideId\": \"{{ride_id}}\", \"passengerId\": \"{{passenger_id}}\", \"amount\": 850.0, \"paymentMethod\": \"CARD\", \"simulatedCardNumber\": \"4111111110000\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Process Payment - Duplicate Payment (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/payments",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"rideId\": \"{{ride_id}}\", \"passengerId\": \"{{passenger_id}}\", \"amount\": 850.0, \"paymentMethod\": \"CARD\", \"simulatedCardNumber\": \"4111111111111111\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Process Payment - Zero Amount (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/payments",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"rideId\": \"{{ride_id}}\", \"passengerId\": \"{{passenger_id}}\", \"amount\": 0, \"paymentMethod\": \"CASH\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Process Payment - Missing Ride ID (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/payments",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"rideId\": \"\", \"passengerId\": \"{{passenger_id}}\", \"amount\": 500.0, \"paymentMethod\": \"CASH\"}"
+            }
+          }
+        },
+        {
+          "name": "[POS] Get Payment By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has paymentId', () => pm.expect(pm.response.json().paymentId).to.exist);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{payment_url}}/api/payments/{{payment_id}}",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "{{payment_id}}"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[NEG] Get Payment By ID - NotFound (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{payment_url}}/api/payments/PAY-NOTEXIST-9999",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "PAY-NOTEXIST-9999"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Get Payment By Ride ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/payments/ride/{{ride_id}}",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "ride",
+                "{{ride_id}}"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Get Passenger Payment History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/payments/passenger/{{passenger_id}}",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "passenger",
+                "{{passenger_id}}"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Get Receipt",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has receipt data', () => pm.expect(pm.response.json()).to.exist);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{payment_url}}/api/payments/{{payment_id}}/receipt",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "{{payment_id}}",
+                "receipt"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[NEG] Get Receipt - NotFound (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{payment_url}}/api/payments/PAY-FAKE/receipt",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "PAY-FAKE",
+                "receipt"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Admin - List All Payments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/payments",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Admin - List Payments Filter COMPLETED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/payments?status=COMPLETED",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "COMPLETED"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "[NEG] Admin - List All Payments NonAdmin (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/payments",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "[POS] Admin - Refund Payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Is REFUNDED', () => pm.expect(pm.response.json().status).to.equal('REFUNDED'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/payments/{{payment_id}}/refund",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "{{payment_id}}",
+                "refund"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reason\": \"Passenger complained about service quality\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Refund Payment - NonAdmin (403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{passenger_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/payments/{{payment_id}}/refund",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "{{payment_id}}",
+                "refund"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reason\": \"I want my money back\"}"
+            }
+          }
+        },
+        {
+          "name": "[NEG] Refund Payment - Missing Reason (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{payment_url}}/api/payments/{{payment_id}}/refund",
+              "host": [
+                "{{payment_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "{{payment_id}}",
+                "refund"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reason\": \"\"}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
