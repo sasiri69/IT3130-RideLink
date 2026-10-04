@@ -9,7 +9,7 @@ Backend microservices architecture developed for IT3130 - Application Developmen
 | # | Microservice | Primary Owner | Student ID | Service Status | Port |
 |---|---|---|---|---|---|
 | 1 | Account & Auth Service | Jayakody J A K S S | IT24100778 | Completed & Tested | 8081 |
-| 2 | Driver & Vehicle Service | Sasiru Deshan | IT24100687 | Completed & Tested | 8082 |
+| 2 | Driver & Vehicle Service | Sansiri P.S.T | IT24100687 | Completed & Tested | 8082 |
 | 3 | Ride Management Service | Idusara S K U | IT24101290 | Completed & Tested | 8083 |
 | 4 | Fare & Payment Service | Meththasinghe M.D.D.T | IT24100891 | Completed & Tested | 8084 |
 
