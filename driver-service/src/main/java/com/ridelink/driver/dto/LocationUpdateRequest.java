@@ -3,6 +3,7 @@ package com.ridelink.driver.dto;
 import com.ridelink.driver.model.Location;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +28,7 @@ public class LocationUpdateRequest {
     @DecimalMax(value = "180.0", message = "Longitude must be <= 180.0")
     private Double longitude;
 
+    @NotBlank(message = "Address name is required and cannot be empty or blank")
     private String addressName;
 
     public Location toEntity() {
