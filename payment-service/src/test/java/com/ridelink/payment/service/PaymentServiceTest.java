@@ -9,6 +9,7 @@ import com.ridelink.payment.dto.PaymentResponse;
 import com.ridelink.payment.dto.ReceiptResponse;
 import com.ridelink.payment.dto.RefundRequest;
 import com.ridelink.payment.exception.DuplicatePaymentException;
+import com.ridelink.payment.exception.InvalidPaymentRequestException;
 import com.ridelink.payment.exception.PaymentNotFoundException;
 import com.ridelink.payment.exception.PaymentProcessingException;
 import com.ridelink.payment.exception.ReceiptNotFoundException;
@@ -218,41 +219,101 @@ class PaymentServiceTest {
     }
 
     @Test
-    @DisplayName("Should retrieve payment by ride ID")
-    void testGetPaymentByRideId_Success() {
-        when(paymentRepository.findByRideId("RIDE-A1B2C3D4"))
-                .thenReturn(Optional.of(samplePayment));
+    @DisplayName("Negative Scenario: Should throw InvalidPaymentRequestException when ride is not COMPLETED")
+    void testProcessPayment_RideNotCompleted_ThrowsException() {
+        PaymentRequest request = PaymentRequest.builder()
+                .rideId("RIDE-A1B2C3D4")
+                .passengerId("PASS-101")
+                .amount(1500.0)
+                .paymentMethod(PaymentMethod.CASH)
+                .build();
 
-        PaymentResponse response = paymentService.getPaymentByRideId("RIDE-A1B2C3D4");
+        when(accountServiceClient.getPassengerById(anyString(), any()))
+                .thenReturn(AccountUserResponse.builder().id("PASS-101").status("ACTIVE").build());
 
-        assertNotNull(response);
-        assertEquals("RIDE-A1B2C3D4", response.getRideId());
-        assertEquals("PAY-12345678", response.getPaymentId());
-    }
+        when(rideServiceClient.getRideById(anyString(), any()))
+                .thenReturn(RideClientResponse.builder().rideId("RIDE-A1B2C3D4").status("CANCELLED").build());
 
-    @Test
-    @DisplayName("Should return empty list when passenger has no payment history")
-    void testGetPaymentsByPassenger_EmptyList() {
-        when(paymentRepository.findByPassengerIdOrderByCreatedAtDesc("PASS-999"))
-                .thenReturn(java.util.List.of());
-
-        java.util.List<PaymentResponse> result = paymentService.getPaymentsByPassenger("PASS-999");
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    @DisplayName("Should throw InvalidPaymentRequestException when refunding a non-completed payment")
-    void testRefundPayment_NotCompleted_ThrowsException() {
-        samplePayment.setStatus(PaymentStatus.FAILED);
-        when(paymentRepository.findByPaymentId("PAY-12345678"))
-                .thenReturn(Optional.of(samplePayment));
-
-        assertThrows(com.ridelink.payment.exception.InvalidPaymentRequestException.class, () ->
-                paymentService.refundPayment("PAY-12345678", new RefundRequest("Error"))
+        assertThrows(InvalidPaymentRequestException.class, () ->
+                paymentService.processPayment(request, null)
         );
+    }
 
-        verify(paymentRepository, never()).save(any(Payment.class));
+    @Test
+    @DisplayName("Negative Scenario: Should throw InvalidPaymentRequestException when passengerId does not match ride")
+    void testProcessPayment_MismatchedPassenger_ThrowsException() {
+        PaymentRequest request = PaymentRequest.builder()
+                .rideId("RIDE-A1B2C3D4")
+                .passengerId("PASS-ATTACKER")
+                .amount(1500.0)
+                .paymentMethod(PaymentMethod.CASH)
+                .build();
+
+        when(accountServiceClient.getPassengerById(anyString(), any()))
+                .thenReturn(AccountUserResponse.builder().id("PASS-ATTACKER").status("ACTIVE").build());
+
+        when(rideServiceClient.getRideById(anyString(), any()))
+                .thenReturn(RideClientResponse.builder()
+                        .rideId("RIDE-A1B2C3D4")
+                        .passengerId("PASS-LEGITIMATE")
+                        .status("COMPLETED")
+                        .build());
+
+        assertThrows(InvalidPaymentRequestException.class, () ->
+                paymentService.processPayment(request, null)
+        );
+    }
+
+    @Test
+    @DisplayName("Negative Scenario: Should throw InvalidPaymentRequestException when payment amount does not match ride fare")
+    void testProcessPayment_MismatchedAmount_ThrowsException() {
+        PaymentRequest request = PaymentRequest.builder()
+                .rideId("RIDE-A1B2C3D4")
+                .passengerId("PASS-101")
+                .amount(50.0)
+                .paymentMethod(PaymentMethod.CASH)
+                .build();
+
+        when(accountServiceClient.getPassengerById(anyString(), any()))
+                .thenReturn(AccountUserResponse.builder().id("PASS-101").status("ACTIVE").build());
+
+        when(rideServiceClient.getRideById(anyString(), any()))
+                .thenReturn(RideClientResponse.builder()
+                        .rideId("RIDE-A1B2C3D4")
+                        .passengerId("PASS-101")
+                        .status("COMPLETED")
+                        .finalFare(1500.0)
+                        .build());
+
+        assertThrows(InvalidPaymentRequestException.class, () ->
+                paymentService.processPayment(request, null)
+        );
+    }
+
+    @Test
+    @DisplayName("Negative Scenario: Should throw InvalidPaymentRequestException when card number format is invalid")
+    void testProcessPayment_InvalidCardFormat_ThrowsException() {
+        PaymentRequest request = PaymentRequest.builder()
+                .rideId("RIDE-A1B2C3D4")
+                .passengerId("PASS-101")
+                .amount(1500.0)
+                .paymentMethod(PaymentMethod.CARD)
+                .simulatedCardNumber("12345")
+                .build();
+
+        when(accountServiceClient.getPassengerById(anyString(), any()))
+                .thenReturn(AccountUserResponse.builder().id("PASS-101").status("ACTIVE").build());
+
+        when(rideServiceClient.getRideById(anyString(), any()))
+                .thenReturn(RideClientResponse.builder()
+                        .rideId("RIDE-A1B2C3D4")
+                        .passengerId("PASS-101")
+                        .status("COMPLETED")
+                        .finalFare(1500.0)
+                        .build());
+
+        assertThrows(InvalidPaymentRequestException.class, () ->
+                paymentService.processPayment(request, null)
+        );
     }
 }

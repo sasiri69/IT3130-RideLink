@@ -106,6 +106,40 @@ public class RideServiceClient {
         }
     }
 
+    /**
+     * Updates payment status on the corresponding ride in Ride Management Service.
+     *
+     * @param rideId Target ride identifier
+     * @param paymentId Generated payment identifier
+     * @param paymentStatus Payment status string (e.g. PAID)
+     * @param incomingToken Caller authorization token or null
+     */
+    public void updateRidePaymentStatus(String rideId, String paymentId, String paymentStatus, String incomingToken) {
+        String url = rideServiceUrl + "/api/rides/" + rideId + "/payment";
+        log.info("Interservice REST call -> Ride Service: PATCH {} (paymentId: {}, status: {})", url, paymentId, paymentStatus);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String token = (incomingToken != null && !incomingToken.isBlank())
+                ? incomingToken
+                : "Bearer " + generateInternalServiceToken();
+        headers.set("Authorization", token.startsWith("Bearer ") ? token : "Bearer " + token);
+
+        Map<String, String> body = new HashMap<>();
+        body.put("paymentId", paymentId);
+        body.put("paymentStatus", paymentStatus);
+
+        HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
+
+        try {
+            restTemplate.exchange(url, HttpMethod.PATCH, entity, Void.class);
+            log.info("Successfully updated ride {} payment status to {}", rideId, paymentStatus);
+        } catch (Exception ex) {
+            log.warn("Could not notify Ride Service of payment completion for ride {}: {}", rideId, ex.getMessage());
+        }
+    }
+
     private String generateInternalServiceToken() {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", "ADMIN");
